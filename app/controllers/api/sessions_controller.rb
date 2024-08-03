@@ -1,5 +1,5 @@
 class Api::SessionsController < Devise::SessionsController
-  skip_before_action :verify_authenticity_token, only: [:create, :destroy]
+  skip_before_action :verify_authenticity_token, only: [:create, :destroy, :register]
   respond_to :json
 
   def create
@@ -15,5 +15,20 @@ class Api::SessionsController < Devise::SessionsController
   def destroy
     sign_out current_user
     render json: { message: 'Logout successful' }, status: :ok
+  end
+
+  def register
+    user = User.new(user_params)
+    if user.save
+      render json: { message: 'Registration successful', user: user }, status: :created
+    else
+      render json: { message: 'Registration failed', errors: user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit(:email, :password, :password_confirmation, :name)
   end
 end
