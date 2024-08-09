@@ -62,12 +62,13 @@ GEM
       zeitwerk (~> 2.3)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
-    autoprefixer-rails (10.4.16.0)
+    autoprefixer-rails (10.4.19.0)
       execjs (~> 2)
+    awesome_print (1.9.2)
     base64 (0.2.0)
     bcrypt (3.1.20)
     bindex (0.8.1)
-    bootsnap (1.18.3)
+    bootsnap (1.18.4)
       msgpack (~> 1.2)
     bootstrap (4.6.2)
       autoprefixer-rails (>= 9.1.0)
@@ -123,6 +124,9 @@ GEM
       thor (>= 0.14, < 2.0)
     jwt (2.8.2)
       base64
+    kaminari (0.17.0)
+      actionpack (>= 3.0.0)
+      activesupport (>= 3.0.0)
     listen (3.9.0)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -203,7 +207,7 @@ GEM
     responders (3.1.1)
       actionpack (>= 5.2)
       railties (>= 5.2)
-    rexml (3.3.2)
+    rexml (3.3.4)
       strscan
     rubyzip (2.3.2)
     sass-rails (6.0.0)
@@ -226,7 +230,7 @@ GEM
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
-    sprockets-rails (3.5.1)
+    sprockets-rails (3.5.2)
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
@@ -271,6 +275,7 @@ PLATFORMS
   arm64-darwin-23
 
 DEPENDENCIES
+  awesome_print
   bootsnap (>= 1.4.4)
   bootstrap (~> 4.5)
   byebug
@@ -279,6 +284,7 @@ DEPENDENCIES
   devise-jwt
   jbuilder (~> 2.7)
   jquery-rails
+  kaminari
   listen (~> 3.3)
   pg (~> 1.1)
   popper_js (~> 1.16.0)

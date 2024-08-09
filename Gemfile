@@ -30,6 +30,9 @@ gem 'devise-jwt'
 
 gem 'rack-cors', require: 'rack/cors'
 
+gem 'awesome_print'
+gem 'kaminari'
+
 
 
 

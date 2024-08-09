@@ -15,6 +15,6 @@ class Api::RegistrationsController < Devise::RegistrationsController
   private
 
   def user_params
-    params.require(:user).permit(:username, :email, :password, :password_confirmation, :name)
+    params.require(:user).permit(:username, :email, :password, :password_confirmation, :name, :compagny_id)
   end
 end
