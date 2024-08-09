@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_09_121301) do
+ActiveRecord::Schema.define(version: 2024_08_09_152827) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,6 +42,11 @@ ActiveRecord::Schema.define(version: 2024_08_09_121301) do
     t.datetime "updated_at", precision: 6, null: false
     t.integer "salary"
     t.string "contrat_type"
+    t.string "contract_document_file_name"
+    t.string "contract_document_content_type"
+    t.bigint "contract_document_file_size"
+    t.datetime "contract_document_updated_at"
+    t.string "url"
     t.index ["compagny_id"], name: "index_employees_on_compagny_id"
   end
 

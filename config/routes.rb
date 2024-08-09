@@ -20,7 +20,12 @@ Rails.application.routes.draw do
     #route for Compagny
     resources :companies, only: [:create, :update, :destroy, :show, :index]
     #employees route
-    resources :employees, only: [:index, :show, :create, :update, :destroy]
+
+    resources :employees, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        post :upload_document
+      end
+    end
   end
 
 end

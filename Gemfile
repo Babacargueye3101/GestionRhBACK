@@ -33,6 +33,10 @@ gem 'rack-cors', require: 'rack/cors'
 gem 'awesome_print'
 gem 'kaminari'
 
+# upload file
+gem 'paperclip'
+
+
 
 
 

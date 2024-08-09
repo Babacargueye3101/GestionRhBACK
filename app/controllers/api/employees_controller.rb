@@ -1,6 +1,6 @@
 class Api::EmployeesController < ApplicationController
-  before_action :set_employee, only: [:show, :update, :destroy]
-  skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy]
+  before_action :set_employee, only: [:show, :update, :destroy, :upload_document]
+  skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy, :upload_document]
   def index
 
     @employees = Employee.page(params[:page]).per(params[:per_page] || 10)
@@ -41,6 +41,22 @@ class Api::EmployeesController < ApplicationController
   def destroy
     @employee.destroy
     head :no_content
+  end
+
+
+  def upload_document
+    if params[:contract_document].present?
+      @employee.contract_document = params[:contract_document]
+      if @employee.save
+        document_url = @employee.contract_document.url
+        @employee.update(url: document_url)
+        render json: { message: 'Document uploaded successfully' }, status: :ok
+      else
+        render json: @employee.errors, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'No file provided' }, status: :bad_request
+    end
   end
 
   private

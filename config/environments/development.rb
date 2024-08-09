@@ -17,6 +17,15 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 
 
+  # config/environments/development.rb
+  config.paperclip_defaults = {
+    storage: :filesystem,
+    path: ":rails_root/public/system/:class/:attachment/:id_partition/:style/:filename",
+    url: "/system/:class/:attachment/:id_partition/:style/:filename"
+  }
+
+
+
   # Enable/disable caching. By default caching is disabled.
   # Run rails dev:cache to toggle caching.
   if Rails.root.join('tmp', 'caching-dev.txt').exist?
