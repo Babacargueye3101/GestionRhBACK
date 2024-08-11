@@ -18,12 +18,17 @@ Rails.application.routes.draw do
   namespace :api do
     devise_for :users, controllers: { sessions: 'api/sessions' }
     #route for Compagny
-    resources :companies, only: [:create, :update, :destroy, :show, :index]
+    resources :companies, only: [:create, :update, :destroy, :show, :index] do
+    member do
+      post :upload_logo
+    end
+  end
     #employees route
 
     resources :employees, only: [:index, :show, :create, :update, :destroy] do
       member do
         post :upload_document
+        get  :getAll
       end
     end
   end

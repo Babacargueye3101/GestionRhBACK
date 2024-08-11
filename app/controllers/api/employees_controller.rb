@@ -17,6 +17,20 @@ class Api::EmployeesController < ApplicationController
     }
   end
 
+  def getAll
+    @employees = Employee.where(compagny_id: params[:id])
+                         .order(gender: :DESC)
+    render json: {
+      employees: @employees,
+      statistic_employees: {
+        feminins: @employees.where(gender: 'female').count,
+        masculins: @employees.where(gender: 'male').count,
+        autres: @employees.where.not(gender: ['female', 'male']).count
+      },
+      total: @employees.count
+    }
+  end
+
   def show
     render json: @employee
   end
@@ -66,6 +80,7 @@ class Api::EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.require(:employee).permit(:first_name, :last_name, :email, :phone, :position, :compagny_id, :salary , :contrat_type)
+    params.require(:employee).permit(:first_name, :last_name, :email, :phone, :position, :compagny_id, :salary , :contrat_type,
+                              :birthdate, :gender, :cniNumber)
   end
 end

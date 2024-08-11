@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_09_152827) do
+ActiveRecord::Schema.define(version: 2024_08_11_151639) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -28,6 +28,11 @@ ActiveRecord::Schema.define(version: 2024_08_09_152827) do
     t.string "description"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "logo_file_name"
+    t.string "logo_content_type"
+    t.bigint "logo_file_size"
+    t.datetime "logo_updated_at"
+    t.string "url"
   end
 
   create_table "employees", force: :cascade do |t|
@@ -47,6 +52,9 @@ ActiveRecord::Schema.define(version: 2024_08_09_152827) do
     t.bigint "contract_document_file_size"
     t.datetime "contract_document_updated_at"
     t.string "url"
+    t.string "gender"
+    t.date "birthdate"
+    t.string "cniNumber"
     t.index ["compagny_id"], name: "index_employees_on_compagny_id"
   end
 
