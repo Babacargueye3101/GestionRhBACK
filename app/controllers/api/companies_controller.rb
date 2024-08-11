@@ -10,7 +10,8 @@ class Api::CompaniesController < ApplicationController
 
   # GET /api/companies/:id
   def show
-    render json: @compagny
+    @entreprise= Compagny.find(params[:id])
+    render json: {compagny: @compagny, currentCompagny: @entreprise}
   end
 
   # POST /api/companies
