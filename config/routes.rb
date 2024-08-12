@@ -19,10 +19,10 @@ Rails.application.routes.draw do
     devise_for :users, controllers: { sessions: 'api/sessions' }
     #route for Compagny
     resources :companies, only: [:create, :update, :destroy, :show, :index] do
-    member do
-      post :upload_logo
+      member do
+        post :upload_logo
+      end
     end
-  end
     #employees route
 
     resources :employees, only: [:index, :show, :create, :update, :destroy] do
@@ -31,6 +31,8 @@ Rails.application.routes.draw do
         get  :getAll
       end
     end
+
+    resources :leaves, only: [:index, :show, :create, :update, :destroy]
   end
 
 end

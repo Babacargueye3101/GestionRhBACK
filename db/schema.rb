@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_11_151639) do
+ActiveRecord::Schema.define(version: 2024_08_12_110252) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,6 +63,20 @@ ActiveRecord::Schema.define(version: 2024_08_11_151639) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "leaves", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.string "leave_type"
+    t.date "start_date"
+    t.date "end_date"
+    t.text "reason"
+    t.string "status"
+    t.integer "days_taken"
+    t.text "comments"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["employee_id"], name: "index_leaves_on_employee_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -74,11 +88,13 @@ ActiveRecord::Schema.define(version: 2024_08_11_151639) do
     t.string "name"
     t.string "organismName"
     t.bigint "compagny_id"
+    t.string "role", default: "employee"
     t.index ["compagny_id"], name: "index_users_on_compagny_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   add_foreign_key "employees", "compagnies"
+  add_foreign_key "leaves", "employees"
   add_foreign_key "users", "compagnies"
 end

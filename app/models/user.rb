@@ -5,4 +5,23 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   belongs_to :compagny
+
+  enum role: { admin: 'admin', manager: 'manager', employee: 'employee' }
+
+  after_initialize :set_default_role, if: :new_record?
+
+
+
+
+
+
+
+
+
+  private
+
+  def set_default_role
+    self.role ||= 'employee'
+  end
+
 end
