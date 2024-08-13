@@ -1,11 +1,18 @@
 class Api::LeavesController < ApplicationController
 
   before_action :set_leave, only: [:show, :update, :destroy]
-  skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy]
+  skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy, :changeStatus]
 
     # GET /api/leaves
     def index
-      @leaves = Leave.page(params[:page]).per(params[:per_page] || 10)
+
+      if params[:user_role]=== 'admin'
+        @leaves = Leave.page(params[:page]).per(params[:per_page] || 10).order(updated_at: :DESC)
+      else
+        employee = Employee.find_by(email: params[:email_user])
+        ap Leave.where(employee_id: employee.id)
+        @leaves = Leave.where(employee_id: employee.id).page(params[:page]).per(params[:per_page] || 10).order(updated_at: :DESC)
+      end
 
       render json: {
         conges: @leaves,
@@ -24,9 +31,11 @@ class Api::LeavesController < ApplicationController
 
     # POST /api/leaves
     def create
+      email=User.find(params[:leave][:employee_id])&.email
+      employee= Employee.where(email: email).last
       @leave = Leave.new(leave_params)
-
       if @leave.save
+        @leave.update(employee_id: employee&.id)
         render json: @leave, status: :created
       else
         render json: @leave.errors, status: :unprocessable_entity
@@ -46,6 +55,12 @@ class Api::LeavesController < ApplicationController
     def destroy
       @leave.destroy
       head :no_content
+    end
+
+    def changeStatus
+      leave= Leave.find(params[:leave][:id])
+      leave.update(status: params[:leave][:status], comments: params[:leave][:comment])
+      render json: leave
     end
 
     private

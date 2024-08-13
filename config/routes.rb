@@ -32,7 +32,11 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :leaves, only: [:index, :show, :create, :update, :destroy]
+    resources :leaves, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        put :changeStatus
+      end
+    end
   end
 
 end
