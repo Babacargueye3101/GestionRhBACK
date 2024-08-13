@@ -10,8 +10,7 @@ class Api::LeavesController < ApplicationController
         @leaves = Leave.page(params[:page]).per(params[:per_page] || 10).order(updated_at: :DESC)
       else
         employee = Employee.find_by(email: params[:email_user])
-        ap Leave.where(employee_id: employee.id)
-        @leaves = Leave.where(employee_id: employee.id).page(params[:page]).per(params[:per_page] || 10).order(updated_at: :DESC)
+        @leaves = employee.leaves.page(params[:page]).per(params[:per_page] || 10).order(updated_at: :DESC)
       end
 
       render json: {

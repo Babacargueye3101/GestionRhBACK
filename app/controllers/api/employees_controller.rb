@@ -20,8 +20,16 @@ class Api::EmployeesController < ApplicationController
   def getAll
     @employees = Employee.where(compagny_id: params[:id])
                          .order(gender: :DESC)
+    all_conges= Leave.all.group(:status).count
+
+    start_of_month = Date.current.beginning_of_month
+    end_of_month = Date.current.end_of_month
+    leaves_this_month = Leave.where(created_at: start_of_month..end_of_month).count
+
     render json: {
       employees: @employees,
+      conge_statistique: all_conges,
+      leaves_this_month: leaves_this_month,
       statistic_employees: {
         feminins: @employees.where(gender: 'female').count,
         masculins: @employees.where(gender: 'male').count,
