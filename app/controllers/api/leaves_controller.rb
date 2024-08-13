@@ -16,6 +16,7 @@ class Api::LeavesController < ApplicationController
 
       render json: {
         conges: @leaves,
+        employee: Employee.find_by(email: params[:email_user]),
         meta: {
           total_pages: @leaves.total_pages,
           current_page: @leaves.current_page,
@@ -35,7 +36,7 @@ class Api::LeavesController < ApplicationController
       employee= Employee.where(email: email).last
       @leave = Leave.new(leave_params)
       if @leave.save
-        @leave.update(employee_id: employee&.id)
+        @leave.update(employee_id: employee&.id, full_name: employee.full_name)
         render json: @leave, status: :created
       else
         render json: @leave.errors, status: :unprocessable_entity
@@ -54,7 +55,7 @@ class Api::LeavesController < ApplicationController
     # DELETE /api/leaves/:id
     def destroy
       @leave.destroy
-      head :no_content
+      render json: {message:  "Congé supprimé avec succés"}
     end
 
     def changeStatus
