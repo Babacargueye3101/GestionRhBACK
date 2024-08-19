@@ -37,6 +37,8 @@ Rails.application.routes.draw do
         put :changeStatus
       end
     end
+
+    resources :payments, only: [:index, :show, :create, :update, :destroy]
   end
 
 end

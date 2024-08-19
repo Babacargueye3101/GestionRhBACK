@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_13_154940) do
+ActiveRecord::Schema.define(version: 2024_08_16_124831) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -74,7 +74,21 @@ ActiveRecord::Schema.define(version: 2024_08_13_154940) do
     t.text "comments"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "full_name"
     t.index ["employee_id"], name: "index_leaves_on_employee_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.date "payment_date"
+    t.decimal "amount", precision: 10, scale: 2
+    t.string "payment_method"
+    t.string "reference_number"
+    t.string "status"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.integer "compagny_id"
+    t.index ["employee_id"], name: "index_payments_on_employee_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -96,5 +110,6 @@ ActiveRecord::Schema.define(version: 2024_08_13_154940) do
 
   add_foreign_key "employees", "compagnies"
   add_foreign_key "leaves", "employees"
+  add_foreign_key "payments", "employees"
   add_foreign_key "users", "compagnies"
 end
