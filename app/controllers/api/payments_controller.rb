@@ -7,7 +7,9 @@ class Api::PaymentsController < ApplicationController
     @payments= Payment.page(params[:page]).per(params[:per_page] || 10)
                       .where(compagny_id: params[:compagny_id])
                       .order(updated_at: :DESC)
-    render json: { payments: @payments}
+    render json: {
+      payments: @payments.as_json(include: { employee: { only: [:id, :name] } })
+    }
   end
   # GET /payments/:id
   def show
@@ -16,8 +18,6 @@ class Api::PaymentsController < ApplicationController
 
   # POST /payments
   def create
-    ap "###########"
-    ap payment_params
     @payment = Payment.new(payment_params)
     if @payment.save
       render json: @payment, status: :created
