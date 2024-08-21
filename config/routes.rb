@@ -38,7 +38,7 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :payments, only: [:index, :show, :create, :update, :destroy]
+    resources :payments, only: [:index, :show, :create, :update, :destroy], defaults: { format: :json }
   end
 
 end
