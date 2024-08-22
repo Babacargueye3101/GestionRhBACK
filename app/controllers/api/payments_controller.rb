@@ -36,7 +36,7 @@ class Api::PaymentsController < ApplicationController
       end
 
       format.pdf do
-        pdf = generate_pdf(@payments.where(id: params[:id]))
+        pdf = generate_pdf(@payments)
         send_data pdf.render, filename: "facture-#{Date.today}.pdf", type: 'application/pdf'
       end
 
@@ -60,7 +60,13 @@ class Api::PaymentsController < ApplicationController
 
   # GET /payments/:id
   def show
-    render json: @payment
+    respond_to do |format|
+      format.json { render json: @payment }
+      format.pdf do
+        pdf = generate_single_payment_pdf(@payment)
+        send_data pdf.render, filename: "facture-#{@payment.id}-#{Date.today}.pdf", type: 'application/pdf'
+      end
+    end
   end
 
   # POST /payments
@@ -156,6 +162,75 @@ class Api::PaymentsController < ApplicationController
           payment.status.capitalize
         ]
       end
+
+      # Insérer le tableau
+      table(table_data, header: true, row_colors: ["F0F0F0", "FFFFFF"], position: :center, cell_style: { borders: [:top, :bottom, :left, :right], border_width: 0.5 }) do |t|
+        t.row(0).font_style = :bold
+        t.columns(1..5).align = :center
+        t.header = true
+      end
+
+      # Footer avec la date de génération
+      move_down 20
+      text "Fait le : #{Time.now.strftime('%d/%m/%Y')} à #{Time.now.strftime('%H:%M:%S')}", size: 10, align: :right
+    end
+  end
+
+
+  def generate_single_payment_pdf(payment)
+    compagny = Compagny.find(params[:compagny_id])
+
+    Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
+      # Définir les dimensions de la ligne d'en-tête
+      header_height = 100
+      margin = 10  # Marge entre les deux bounding_box
+      header_bottom_margin = 10  # Marge entre l'en-tête et le tableau
+
+      # En-tête : Logo et Informations de l'entreprise
+      bounding_box([0, cursor], width: bounds.width, height: header_height) do
+        # Créer deux colonnes égales
+        column_width = bounds.width / 2
+
+        # Première colonne : Logo
+        bounding_box([0, cursor], width: column_width, height: header_height) do
+          image compagny.logo.path(:medium), width: 80, height: 40, position: :center, vposition: :baseline
+          move_down 5  # Espacement entre le logo et le texte
+          text compagny.name, size: 14, style: :bold, align: :center
+          move_down 5
+          text "Site web: #{compagny.website}", size: 12, style: :normal, align: :center
+          move_down 5
+          text "Pays: #{compagny.countrie}", size: 12, align: :center
+        end
+
+        # Deuxième colonne : Informations de l'entreprise
+        bounding_box([column_width, cursor], width: column_width - margin, height: header_height) do
+          move_down -80
+          text "Téléphone: #{compagny.phoneNumber}", align: :right
+          text "Ville: #{compagny.city}", size: 12, align: :right
+          text "État: #{compagny.state}", size: 12, align: :right
+          text "Adresse : #{compagny.address}", size: 12, align: :right
+        end
+      end
+
+      # Assurer qu'il y a assez d'espace avant de commencer le tableau
+      move_down header_bottom_margin
+
+      # Titre du document
+      text "Paiement de Salaire", size: 24, style: :bold, align: :center
+      move_down 20
+
+      # Création du tableau avec les en-têtes pour un seul paiement
+      table_data = [["Employé", "Montant (FCFA)", "Date du Paiement", "Payé par", "Référence transaction", "Statut"]]
+
+      # Ajouter le paiement unique dans le tableau
+      table_data << [
+        "#{payment.employee.first_name} #{payment.employee.last_name}",
+        payment.amount,
+        payment.payment_date.strftime("%d/%m/%Y"),
+        payment.payment_method.upcase,
+        payment.reference_number,
+        payment.status.capitalize
+      ]
 
       # Insérer le tableau
       table(table_data, header: true, row_colors: ["F0F0F0", "FFFFFF"], position: :center, cell_style: { borders: [:top, :bottom, :left, :right], border_width: 0.5 }) do |t|
