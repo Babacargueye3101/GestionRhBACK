@@ -11,9 +11,17 @@ class Api::PaymentsController < ApplicationController
   respond_to :json, :csv, :pdf
 
   def index
-    @payments = Payment.page(params[:page]).per(params[:per_page] || 10)
-                       .where(compagny_id: params[:compagny_id])
+    if params[:role] === 'admin'
+      @payments = Payment.page(params[:page]).per(params[:per_page] || 10)
+      .where(compagny_id: params[:compagny_id])
+      .order(updated_at: :desc)
+    else
+      employee = Employee.find_by(email: params[:email])
+      @payments = Payment.page(params[:page]).per(params[:per_page] || 10)
+                       .where(compagny_id: params[:compagny_id], employee_id: employee&.id)
                        .order(updated_at: :desc)
+    end
+
 
     respond_to do |format|
       format.json do
@@ -29,9 +37,24 @@ class Api::PaymentsController < ApplicationController
 
       format.pdf do
         pdf = generate_pdf(@payments.where(id: params[:id]))
-        send_data pdf.render, filename: "payments-#{Date.today}.pdf", type: 'application/pdf'
+        send_data pdf.render, filename: "facture-#{Date.today}.pdf", type: 'application/pdf'
       end
 
+    end
+  end
+
+  def getAllPayment
+    @payments = Payment.where(compagny_id: params[:compagny_id])
+                       .order(updated_at: :desc)
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          payments: @payments.as_json(include: {
+            employee: { only: [:id, :first_name, :last_name, :phone, :position, :gender] }
+          })
+        }
+      end
     end
   end
 
@@ -85,7 +108,7 @@ class Api::PaymentsController < ApplicationController
       # Définir les dimensions de la ligne d'en-tête
       header_height = 100
       margin = 10  # Marge entre les deux bounding_box
-      header_bottom_margin = 40  # Marge entre l'en-tête et le tableau
+      header_bottom_margin = 10  # Marge entre l'en-tête et le tableau
 
       # En-tête : Logo et Informations de l'entreprise
       bounding_box([0, cursor], width: bounds.width, height: header_height) do
@@ -94,7 +117,7 @@ class Api::PaymentsController < ApplicationController
 
         # Première colonne : Logo
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          image compagny.logo.path(:medium), width: 80, position: :center, vposition: :baseline
+          image compagny.logo.path(:medium), width: 80, height: 40, position: :center, vposition: :baseline
           move_down 5  # Espacement entre le logo et le texte
           text compagny.name, size: 14, style: :bold, align: :center
           move_down 5

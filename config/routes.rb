@@ -38,7 +38,11 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :payments, only: [:index, :show, :create, :update, :destroy], defaults: { format: :json }
+    resources :payments, only: [:index, :show, :create, :update, :destroy], defaults: { format: :json } do
+      member do
+        get :getAllPayment
+      end
+    end
   end
 
 end
