@@ -1,5 +1,6 @@
 class Compagny < ApplicationRecord
   has_many :users
+  has_many :announcements
 
   has_attached_file :logo,
                     styles: { medium: "300x300>", thumb: "100x100>" },

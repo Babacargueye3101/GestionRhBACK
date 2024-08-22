@@ -1,4 +1,13 @@
 Rails.application.routes.draw do
+  namespace :api do
+    get 'announcements/index'
+    get 'announcements/show'
+    get 'announcements/new'
+    get 'announcements/create'
+    get 'announcements/edit'
+    get 'announcements/update'
+    get 'announcements/destroy'
+  end
   devise_for :users, controllers: {
     sessions: 'users/sessions'
   }
@@ -43,6 +52,8 @@ Rails.application.routes.draw do
         get :getAllPayment
       end
     end
+
+    resources :announcements
   end
 
 end
