@@ -12,7 +12,9 @@ module Api
 
     # GET /api/announcements
     def index
-      @announcements = Announcement.all
+      @announcements = Announcement.page(params[:page]).per(params[:per_page] || 10)
+                                   .where(compagny_id: params[:compagny_id])
+                                   .order(updated_at: :desc)
       render json: @announcements
     end
 
@@ -55,10 +57,6 @@ module Api
 
 
     def generate_single_annonce_pdf(annonce)
-      ap "##################"
-      ap annonce
-      ap "ZZZZZZZZZZZZZZZZZ"
-      ap params
       compagny = Announcement.find(params[:id])&.compagny
 
       Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
