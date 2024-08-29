@@ -6,11 +6,19 @@ class Api::V1::AppointmentsController < ApplicationController
 
   # GET /api/v1/appointments
   def index
-    @appointments = Appointment.page(params[:page]).per(params[:per_page] || 10)
-                               .where(compagny_id: params[:compagny_id])
-                               .order(updated_at: :desc)
+    @appointments = Appointment.where(compagny_id: params[:compagny_id])
+                           .order(updated_at: :desc)
+                           .page(params[:page])
+                           .per(params[:per_page] || 10)
 
-    render json: @appointments
+    # Ajoutez le nombre total de rendez-vous (sans pagination)
+    total_count = Appointment.where(compagny_id: params[:compagny_id]).count
+
+    render json: {
+      appointments: @appointments,
+      total_count: total_count
+    }
+
   end
 
   # GET /api/v1/appointments/:id
