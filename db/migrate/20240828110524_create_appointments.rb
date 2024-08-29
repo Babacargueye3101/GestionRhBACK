@@ -5,7 +5,7 @@ class CreateAppointments < ActiveRecord::Migration[6.1]
       t.datetime :end_time
       t.string :location
       t.text :description
-      t.integer :status
+      t.string :status
 
       t.timestamps
     end

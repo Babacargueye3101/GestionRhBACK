@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_08_28_115404) do
+ActiveRecord::Schema.define(version: 2024_08_29_113158) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,10 +35,12 @@ ActiveRecord::Schema.define(version: 2024_08_28_115404) do
     t.datetime "end_time"
     t.string "location"
     t.text "description"
-    t.integer "status"
+    t.string "status"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "type"
+    t.string "appointment_type"
+    t.bigint "compagny_id", null: false
+    t.index ["compagny_id"], name: "index_appointments_on_compagny_id"
   end
 
   create_table "compagnies", force: :cascade do |t|
@@ -136,6 +138,7 @@ ActiveRecord::Schema.define(version: 2024_08_28_115404) do
 
   add_foreign_key "announcements", "compagnies"
   add_foreign_key "announcements", "users"
+  add_foreign_key "appointments", "compagnies"
   add_foreign_key "employees", "compagnies"
   add_foreign_key "leaves", "employees"
   add_foreign_key "payments", "employees"

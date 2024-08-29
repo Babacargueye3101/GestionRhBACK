@@ -6,7 +6,10 @@ class Api::V1::AppointmentsController < ApplicationController
 
   # GET /api/v1/appointments
   def index
-    @appointments = Appointment.all
+    @appointments = Appointment.page(params[:page]).per(params[:per_page] || 10)
+                               .where(compagny_id: params[:compagny_id])
+                               .order(updated_at: :desc)
+
     render json: @appointments
   end
 
@@ -57,7 +60,8 @@ class Api::V1::AppointmentsController < ApplicationController
       :location,
       :description,
       :status,
-      :type
+      :appointment_type,
+      :compagny_id
     )
   end
 
