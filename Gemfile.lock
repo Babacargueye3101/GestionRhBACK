@@ -384,7 +384,7 @@ DEPENDENCIES
   jquery-rails
   kaminari
   listen (~> 3.3)
-  paperclip
+  paperclip (~> 6.1.0)
   pg (~> 1.1)
   popper_js (~> 1.16.0)
   prawn

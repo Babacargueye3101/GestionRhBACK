@@ -34,7 +34,7 @@ gem 'awesome_print'
 gem 'kaminari'
 
 # upload file
-gem 'paperclip'
+gem 'paperclip', '~> 6.1.0'
 
 gem 'prawn'
 gem 'prawn-table'
