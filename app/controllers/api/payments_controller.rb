@@ -180,8 +180,16 @@ class Api::PaymentsController < ApplicationController
 
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
-    url =url_for(compagny.logo)
-    logo_file = URI.open(url)
+
+    logo_url = Rails.application.routes.url_helpers.rails_blob_path(compagny.logo, only_path: true)
+    # Gestion des erreurs de téléchargement
+    begin
+      logo_file = URI.open(logo_url)
+    rescue OpenURI::HTTPError => e
+      Rails.logger.error("Erreur lors du téléchargement de l'image du logo : #{e.message}")
+      logo_file = nil
+    end
+
     Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
       header_height = 100
       margin = 10
@@ -191,7 +199,7 @@ class Api::PaymentsController < ApplicationController
         column_width = bounds.width / 2
 
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          if compagny.logo.attached?
+          if logo_file
             image logo_file, width: 80, height: 40, position: :center, vposition: :baseline
           else
             text "Logo non disponible", align: :center
