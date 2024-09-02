@@ -23,11 +23,6 @@ module RecrutementBack
     end
 
 
-    config.action_dispatch.default_headers = {
-      'Content-Security-Policy' => "frame-ancestors 'self' https://gestionrhback.onrender.com"
-    }
-
-
 
 
     # Configuration for the application, engines, and railties goes here.
