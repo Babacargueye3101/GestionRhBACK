@@ -45,7 +45,9 @@ class Api::CompaniesController < ApplicationController
     if params[:logo_compagny].present?
       @company.logo.attach(params[:logo_compagny])
       if @company.save
+
         logo_url = url_for(@company.logo) # Obtient l'URL du fichier attaché
+        Rails.logger.info "Creating a new employee with params: #{employee_params.inspect}"
         @company.update(url: logo_url)
         render json: { message: 'Document uploaded successfully', logo_url: logo_url }, status: :ok
       else
