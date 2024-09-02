@@ -3,8 +3,6 @@ require 'csv'
 require 'prawn'
 require 'prawn/table'
 
-require 'open-uri'
-
 class Api::PaymentsController < ApplicationController
   before_action :set_payment, only: [:show, :update, :destroy]
   skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy]
@@ -180,13 +178,6 @@ class Api::PaymentsController < ApplicationController
 
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
-    if compagny.logo.attached?
-      url = Rails.application.routes.url_helpers.rails_blob_url(compagny.logo, only_path: false)
-      logo_file = URI.open(url)
-    else
-      logo_file = nil
-    end
-
     Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
       header_height = 100
       margin = 10
@@ -196,8 +187,8 @@ class Api::PaymentsController < ApplicationController
         column_width = bounds.width / 2
 
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          if logo_file
-            image logo_file, width: 80, height: 40, position: :center, vposition: :baseline
+          if compagny.logo.attached?
+            image compagny.rul, width: 80, height: 40, position: :center, vposition: :baseline
           else
             text "Logo non disponible", align: :center
           end
