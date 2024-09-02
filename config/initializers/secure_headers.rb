@@ -17,7 +17,7 @@ SecureHeaders::Configuration.default do |config|
     connect_src: %w('self' https: wss:),
     media_src: %w('self'),
     object_src: %w('self'),
-    frame_src: %w('self' https://gestionrhback.onrender.com),
+    frame_src: %w('self' http://localhost:4200),
     worker_src: %w('self'),
     base_uri: %w('self'),
     form_action: %w('self'),
