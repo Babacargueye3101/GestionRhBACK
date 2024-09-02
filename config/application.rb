@@ -14,7 +14,7 @@ module RecrutementBack
 
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins 'https://gestionrhback.onrender.com' # Remplacez '*' par votre domaine Angular en production
+        origins 'http://localhost:4200' # Remplacez '*' par votre domaine Angular en production
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],
