@@ -121,9 +121,8 @@ class Api::PaymentsController < ApplicationController
         column_width = bounds.width / 2
 
         # Première colonne : Logo
-        logo_url = url_for(compagny.logo)
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          image logo_url, width: 80, height: 40, position: :center, vposition: :baseline
+          image compagny.url, width: 80, height: 40, position: :center, vposition: :baseline
           move_down 5  # Espacement entre le logo et le texte
           text compagny.name, size: 14, style: :bold, align: :center
           move_down 5
@@ -179,7 +178,6 @@ class Api::PaymentsController < ApplicationController
 
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
-
     Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
       # Définir les dimensions de la ligne d'en-tête
       header_height = 100
@@ -192,9 +190,8 @@ class Api::PaymentsController < ApplicationController
         column_width = bounds.width / 2
 
         # Première colonne : Logo
-        logo_url = url_for(compagny.logo)
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          image logo_url, width: 80, height: 40, position: :center, vposition: :baseline
+          image compagny.url, width: 80, height: 40, position: :center, vposition: :baseline
           move_down 5  # Espacement entre le logo et le texte
           text compagny.name, size: 14, style: :bold, align: :center
           move_down 5
