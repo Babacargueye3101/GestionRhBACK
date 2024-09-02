@@ -180,13 +180,10 @@ class Api::PaymentsController < ApplicationController
 
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
-
-    logo_url = Rails.application.routes.url_helpers.rails_blob_path(compagny.logo, only_path: true)
-    # Gestion des erreurs de téléchargement
-    begin
-      logo_file = URI.open(logo_url)
-    rescue OpenURI::HTTPError => e
-      Rails.logger.error("Erreur lors du téléchargement de l'image du logo : #{e.message}")
+    if compagny.logo.attached?
+      url = Rails.application.routes.url_helpers.rails_blob_url(compagny.logo, only_path: false)
+      logo_file = URI.open(url)
+    else
       logo_file = nil
     end
 
