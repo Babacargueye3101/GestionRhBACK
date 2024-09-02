@@ -179,28 +179,27 @@ class Api::PaymentsController < ApplicationController
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
     Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
-      # Définir les dimensions de la ligne d'en-tête
       header_height = 100
-      margin = 10  # Marge entre les deux bounding_box
-      header_bottom_margin = 10  # Marge entre l'en-tête et le tableau
+      margin = 10
+      header_bottom_margin = 10
 
-      # En-tête : Logo et Informations de l'entreprise
       bounding_box([0, cursor], width: bounds.width, height: header_height) do
-        # Créer deux colonnes égales
         column_width = bounds.width / 2
 
-        # Première colonne : Logo
         bounding_box([0, cursor], width: column_width, height: header_height) do
-          image compagny.url, width: 80, height: 40, position: :center, vposition: :baseline
-          move_down 5  # Espacement entre le logo et le texte
+          if compagny.logo.attached?
+            image url_for(compagny.logo), width: 80, height: 40, position: :center, vposition: :baseline
+          else
+            text "Logo non disponible", align: :center
+          end
+          move_down 5
           text compagny.name, size: 14, style: :bold, align: :center
           move_down 5
-          text "Site web: #{compagny.website}", size: 12, style: :normal, align: :center
+          text "Site web: #{compagny.website}", size: 12, align: :center
           move_down 5
           text "Pays: #{compagny.countrie}", size: 12, align: :center
         end
 
-        # Deuxième colonne : Informations de l'entreprise
         bounding_box([column_width, cursor], width: column_width - margin, height: header_height) do
           move_down -80
           text "Téléphone: #{compagny.phoneNumber}", align: :right
@@ -210,17 +209,12 @@ class Api::PaymentsController < ApplicationController
         end
       end
 
-      # Assurer qu'il y a assez d'espace avant de commencer le tableau
       move_down header_bottom_margin
-
-      # Titre du document
       text "Paiement de Salaire", size: 24, style: :bold, align: :center
       move_down 20
 
-      # Création du tableau avec les en-têtes pour un seul paiement
       table_data = [["Employé", "Montant (FCFA)", "Date du Paiement", "Payé par", "Référence transaction", "Statut"]]
 
-      # Ajouter le paiement unique dans le tableau
       table_data << [
         "#{payment.employee.first_name} #{payment.employee.last_name}",
         payment.amount,
@@ -230,14 +224,11 @@ class Api::PaymentsController < ApplicationController
         payment.status.capitalize
       ]
 
-      # Insérer le tableau
       table(table_data, header: true, row_colors: ["F0F0F0", "FFFFFF"], position: :center, cell_style: { borders: [:top, :bottom, :left, :right], border_width: 0.5 }) do |t|
         t.row(0).font_style = :bold
         t.columns(1..5).align = :center
-        t.header = true
       end
 
-      # Footer avec la date de génération
       move_down 20
       text "Fait le : #{Time.now.strftime('%d/%m/%Y')} à #{Time.now.strftime('%H:%M:%S')}", size: 10, align: :right
     end
