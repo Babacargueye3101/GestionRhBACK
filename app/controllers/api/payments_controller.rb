@@ -17,9 +17,8 @@ class Api::PaymentsController < ApplicationController
       .order(updated_at: :desc)
     else
       employee = Employee.find_by(email: params[:email])
-      @payments = Payment.page(params[:page]).per(params[:per_page] || 10)
-                       .where(compagny_id: params[:compagny_id], employee_id: employee&.id)
-                       .order(updated_at: :desc)
+      @payments = employee.payments.page(params[:page]).per(params[:per_page] || 10)
+                          .order(updated_at: :desc)
     end
 
 

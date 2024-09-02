@@ -41,15 +41,15 @@ class Api::CompaniesController < ApplicationController
   end
 
   def upload_logo
-    @compagny= Compagny.find(params[:id])
+    @company = Compagny.find(params[:id])
     if params[:logo_compagny].present?
-      @compagny.logo = params[:logo_compagny]
-      if @compagny.save
-        logo_url = @compagny.logo.url
-        @compagny.update(url: logo_url)
-        render json: { message: 'Document uploaded successfully' }, status: :ok
+      @company.logo.attach(params[:logo_compagny])
+      if @company.save
+        logo_url = url_for(@company.logo) # Obtient l'URL du fichier attaché
+        @company.update(url: logo_url)
+        render json: { message: 'Document uploaded successfully', logo_url: logo_url }, status: :ok
       else
-        render json: @compagny.errors, status: :unprocessable_entity
+        render json: @company.errors, status: :unprocessable_entity
       end
     else
       render json: { error: 'No file provided' }, status: :bad_request

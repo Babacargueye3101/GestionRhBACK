@@ -1,11 +1,8 @@
 class AddAttachmentLogoToCompagnies < ActiveRecord::Migration[6.1]
-  def self.up
-    change_table :compagnies do |t|
-      t.attachment :logo
-    end
-  end
-
-  def self.down
-    remove_attachment :compagnies, :logo
+  def change
+    add_column :compagnies, :logo_file_name, :string
+    add_column :compagnies, :logo_content_type, :string
+    add_column :compagnies, :logo_file_size, :integer
+    add_column :compagnies, :logo_updated_at, :datetime
   end
 end

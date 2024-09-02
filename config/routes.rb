@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   devise_scope :user do
     root to: 'devise/sessions#new'
   end
-  get  'user/sign_up', to: 'devise/registrations#new'
+  # get  'user/sign_up', to: 'devise/registrations#new'
 
   namespace :api do
     get 'announcements/index'
@@ -53,6 +53,10 @@ Rails.application.routes.draw do
 
     namespace :v1 do
       resources :appointments
+    end
+
+    resources :folders do
+      resources :documents
     end
   end
 

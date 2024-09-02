@@ -1,11 +1,15 @@
 class AddAttachmentContractDocumentToEmployees < ActiveRecord::Migration[6.1]
-  def self.up
-    change_table :employees do |t|
-      t.attachment :contract_document
-    end
+  def up
+    add_column :employees, :contract_document_file_name, :string
+    add_column :employees, :contract_document_content_type, :string
+    add_column :employees, :contract_document_file_size, :integer
+    add_column :employees, :contract_document_updated_at, :datetime
   end
 
-  def self.down
-    remove_attachment :employees, :contract_document
+  def down
+    remove_column :employees, :contract_document_file_name
+    remove_column :employees, :contract_document_content_type
+    remove_column :employees, :contract_document_file_size
+    remove_column :employees, :contract_document_updated_at
   end
 end
