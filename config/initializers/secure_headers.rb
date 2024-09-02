@@ -21,6 +21,6 @@ SecureHeaders::Configuration.default do |config|
     worker_src: %w('self'),
     base_uri: %w('self'),
     form_action: %w('self'),
-    frame_ancestors: %w('self' https://gestionrhback.onrender.com)
+    frame_ancestors: %w('self' http://localhost:4200)
   }
 end

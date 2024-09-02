@@ -20,16 +20,16 @@
 
 # config/initializers/content_security_policy.rb
 
-Rails.application.config.content_security_policy do |policy|
-  # Autoriser les iframe uniquement depuis https://gestionrhback.onrender.com
-  policy.frame_ancestors "https://gestionrhback.onrender.com"
+# Rails.application.config.content_security_policy do |policy|
+#   # Autoriser les iframe uniquement depuis https://gestionrhback.onrender.com
+#   policy.frame_ancestors "https://gestionrhback.onrender.com"
 
-  # Ajoutez d'autres directives CSP si nécessaire
-  # policy.default_src :self
-  # policy.script_src :self, :https
-  # policy.style_src :self, :https
-  # policy.img_src :self, :data, :https
-end
+#   # Ajoutez d'autres directives CSP si nécessaire
+#   # policy.default_src :self
+#   # policy.script_src :self, :https
+#   # policy.style_src :self, :https
+#   # policy.img_src :self, :data, :https
+# end
 
 # If you are using UJS then enable automatic nonce generation
 # Rails.application.config.content_security_policy_nonce_generator = -> request { SecureRandom.base64(16) }
