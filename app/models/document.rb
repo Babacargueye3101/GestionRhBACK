@@ -1,6 +1,7 @@
 class Document < ApplicationRecord
   belongs_to :folder
   has_one_attached :file
-  validates_attachment :file, content_type: { content_type: ["application/pdf"] }
 
+  # Validation pour Active Storage
+  validates :file, content_type: { in: ['application/pdf'], message: 'must be a PDF' }
 end
