@@ -3,7 +3,8 @@ class Employee < ApplicationRecord
   has_many :leaves
   has_many :payments
 
-  has_one_attached :contract_document
+  has_attached_file :contract_document
+  validates_attachment_content_type :contract_document, content_type: ["application/pdf"]
 
 
   def full_name
