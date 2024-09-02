@@ -78,11 +78,10 @@ class Api::EmployeesController < ApplicationController
 
   def upload_document
     if params[:contract_document].present?
-      @employee.contract_document = params[:contract_document]
+      @employee.contract_document.attach(params[:contract_document])
       if @employee.save
-        document_url = @employee.contract_document.url
-        @employee.update(url: document_url)
-        render json: { message: 'Document uploaded successfully' }, status: :ok
+        document_url = url_for(@employee.contract_document)
+        render json: { message: 'Document uploaded successfully', document_url: document_url }, status: :ok
       else
         render json: @employee.errors, status: :unprocessable_entity
       end
