@@ -178,6 +178,7 @@ class Api::PaymentsController < ApplicationController
 
   def generate_single_payment_pdf(payment)
     compagny = Compagny.find(params[:compagny_id])
+
     Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
       header_height = 100
       margin = 10
@@ -188,7 +189,14 @@ class Api::PaymentsController < ApplicationController
 
         bounding_box([0, cursor], width: column_width, height: header_height) do
           if compagny.logo.attached?
-            image compagny.rul, width: 80, height: 40, position: :center, vposition: :baseline
+            begin
+
+              Rails.logger.info "Type d'objet : #{compagny.logo.attached?}"
+              image compagny.url, width: 80, height: 40, position: :center, vposition: :baseline
+            rescue => e
+              Rails.logger.error "Erreur lors du téléchargement de l'image : #{e.message}"
+              text "Logo non disponible", align: :center
+            end
           else
             text "Logo non disponible", align: :center
           end
@@ -233,7 +241,6 @@ class Api::PaymentsController < ApplicationController
       text "Fait le : #{Time.now.strftime('%d/%m/%Y')} à #{Time.now.strftime('%H:%M:%S')}", size: 10, align: :right
     end
   end
-
 
 
 
