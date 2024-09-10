@@ -58,7 +58,7 @@ module Api
 
     def generate_single_annonce_pdf(annonce)
       compagny = Announcement.find(params[:id])&.compagny
-
+      image_url = compagny.logo.download
       Prawn::Document.new(page_size: 'A4', page_layout: :portrait) do
         # Définir les dimensions de la ligne d'en-tête
         header_height = 100
@@ -72,7 +72,7 @@ module Api
 
           # Première colonne : Logo
           bounding_box([0, cursor], width: column_width, height: header_height) do
-            image compagny.logo.path(:medium), width: 80, height: 40, position: :center, vposition: :baseline
+            image StringIO.new(image_url), width: 80, height: 40, position: :center, vposition: :baseline
             move_down 5  # Espacement entre le logo et le texte
             text compagny.name, size: 14, style: :bold, align: :center
             move_down 5
