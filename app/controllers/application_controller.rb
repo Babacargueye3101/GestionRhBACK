@@ -1,12 +1,16 @@
 class ApplicationController < ActionController::Base
 
-  protect_from_forgery with: :exception
-
-  before_action :set_csrf_headers
+  before_action :authenticate_user, except: [:register, :create]
 
   private
 
-  def set_csrf_headers
-    response.set_header('X-CSRF-Token', form_authenticity_token)
+  def authenticate_user
+    token = request.headers['Authorization']&.split(' ')&.last
+    begin
+      decoded_token = JWT.decode(token, ENV['SECRET_KEY_BASE'])[0]
+      @current_user = User.find(decoded_token['id'])
+    rescue JWT::DecodeError, ActiveRecord::RecordNotFound
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
   end
 end
