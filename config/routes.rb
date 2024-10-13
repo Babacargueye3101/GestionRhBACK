@@ -63,9 +63,9 @@ Rails.application.routes.draw do
       resources :appointments
     end
 
-    resources :folders do
-      resources :documents
-    end
+    resources :folders
+
+    resources :documents
   end
 
 end
