@@ -180,7 +180,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
     t.boolean "can_see_candidature", default: false
     t.boolean "can_see_formation", default: false
     t.boolean "can_see_paies", default: false
-    t.string "token"
     t.index ["compagny_id"], name: "index_users_on_compagny_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
