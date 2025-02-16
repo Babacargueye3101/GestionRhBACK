@@ -66,6 +66,13 @@ Rails.application.routes.draw do
     resources :folders
 
     resources :documents
+
+    resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
+      get 'stock_summary', on: :member
+      resources :products, only: [:index, :create, :update, :destroy]
+      resources :sales, only: [:index, :create, :update, :destroy]
+      resources :categories, only: [:index, :create, :update, :destroy]
+    end
   end
 
 end

@@ -6,7 +6,7 @@ class Api::SessionsController < Devise::SessionsController
     user = User.find_for_database_authentication(email: params[:email])
     if user&.valid_password?(params[:password])
       sign_in user
-      token = user.generate_jwt
+      token = user&.generate_jwt
       user.update(token: token)
       render json: { message: 'Login successful', user: user }, status: :ok
     else
