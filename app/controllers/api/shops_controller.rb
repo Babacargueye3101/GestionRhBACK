@@ -21,7 +21,7 @@ class Api::ShopsController < ApplicationController
 
 
    # ✅ Mise à jour d'un shop
-   def update
+  def update
     if @shop.update(shop_params)
       render json: @shop, status: :ok
     else
@@ -36,29 +36,29 @@ class Api::ShopsController < ApplicationController
   end
 
  # ✅ Obtenir les stocks par catégorie
- def stock_summary
-  # Récupérer les produits avec leur catégorie et leur stock
-  products = @shop.products
-                  .joins(:category)
-                  .select('categories.id AS category_id, categories.name AS category_name, products.name AS product_name, products.stock')
+  def stock_summary
+    # Récupérer les produits avec leur catégorie et leur stock
+    products = @shop.products
+                    .joins(:category)
+                    .select('categories.id AS category_id, categories.name AS category_name, products.name AS product_name, products.stock')
 
-  # Regrouper les produits par catégorie (avec l'ID de la catégorie)
-  grouped_stock_summary = products.group_by { |p| { id: p.category_id, name: p.category_name } }
-                                  .transform_values do |products|
-    products.map { |p| { name: p.product_name, stock: p.stock } }
+    # Regrouper les produits par catégorie (avec l'ID de la catégorie)
+    grouped_stock_summary = products.group_by { |p| { id: p.category_id, name: p.category_name } }
+                                    .transform_values do |products|
+      products.map { |p| { name: p.product_name, stock: p.stock } }
+    end
+
+    # Réorganiser les données pour un format plus structuré
+    formatted_data = grouped_stock_summary.map do |category, products|
+      {
+        id: category[:id],
+        name: category[:name],
+        products: products
+      }
+    end
+
+    render json: { stock_summary: { categories: formatted_data } }, status: :ok
   end
-
-  # Réorganiser les données pour un format plus structuré
-  formatted_data = grouped_stock_summary.map do |category, products|
-    {
-      id: category[:id],
-      name: category[:name],
-      products: products
-    }
-  end
-
-  render json: { stock_summary: { categories: formatted_data } }, status: :ok
-end
 
   
 
