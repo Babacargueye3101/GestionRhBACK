@@ -14,6 +14,14 @@ class Api::SalesController < ApplicationController
   def create
     sale = @shop.sales.new(sale_params)
     sale.user = current_user
+  # Calculer total_price en fonction des produits
+    total_price = 0
+
+    params[:products].each do |product|
+      total_price += product[:quantity] * product[:price]
+    end
+
+    sale.total_price = total_price # Mettre à jour le total_price calculé
 
     if sale.save
       params[:products].each do |product|
@@ -53,6 +61,6 @@ class Api::SalesController < ApplicationController
   end
 
   def sale_params
-    params.require(:sale).permit(:buyer_name, :buyer_surname, :channel, :total_price, :paid_amount, :payment_method, :delivered, :sale_date)
+    params.require(:sale).permit(:buyer_name, :buyer_surname, :channel, :paid_amount, :payment_method, :delivered, :sale_date)
   end
 end
