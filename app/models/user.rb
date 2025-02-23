@@ -5,7 +5,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
   has_many :shops, dependent: :destroy
   belongs_to :compagny
-
+  has_many :availabilities
   enum role: { admin: 'admin', manager: 'manager', employee: 'employee' }
 
   after_initialize :set_default_role, if: :new_record?

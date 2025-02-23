@@ -4,4 +4,6 @@ class Shop < ApplicationRecord
   belongs_to :user
   has_many :sales, dependent: :destroy
   has_many :categories, dependent: :destroy
+  has_many :salons, dependent: :destroy
+
 end
