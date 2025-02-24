@@ -91,6 +91,7 @@ Rails.application.routes.draw do
       resources :availabilities, only: [:create]
     end
     resources :availabilities, only: [:index, :destroy]
+    resources :personnels, only: [:index, :show, :create, :update, :destroy]
   end
 
 end
