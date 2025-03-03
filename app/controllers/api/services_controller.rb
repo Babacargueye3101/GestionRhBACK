@@ -1,12 +1,12 @@
 class Api::ServicesController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
   before_action :set_salon
   before_action :set_service, only: %i[show update destroy]
 
   # ✅ Liste des services d'un salon
   def index
-    services = @salon.services
+    services = @salon.services.page(params[:page]).per(10)
     render json: services, status: :ok
   end
 

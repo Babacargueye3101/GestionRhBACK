@@ -1,11 +1,11 @@
 class Api::ShopsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
   before_action :set_shop, only: [:update, :destroy, :stock_summary]
 
     # ✅ Liste des shops de l'utilisateur
   def index
-    shops = current_user.shops
+    shops = current_user.shops.page(params[:page]).per(10)
     render json: shops, status: :ok
   end
 

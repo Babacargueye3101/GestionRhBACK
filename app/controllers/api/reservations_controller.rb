@@ -1,7 +1,7 @@
 class Api::ReservationsController < ApplicationController
-  skip_before_action :authenticate_user, only: %i[create]
+  skip_before_action :authenticate_user_token_token!, only: %i[create]
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!, only: [:show, :update]
+  before_action :authenticate_user_token_token!, only: [:show, :update]
   before_action :set_reservation, only: [:show, :update]
   #Contrôleur pour les clients (prise de rendez-vous)
   def create
@@ -52,7 +52,7 @@ class Api::ReservationsController < ApplicationController
 
   def update
     if  @reservation.update(status: params[:status])
-      #ReservationMailer.confirmation_email(@reservation).deliver_now # 🔥 Envoi de l'email
+      ReservationMailer.confirmation_email(current_user, @reservation).deliver_now # 🔥 Envoi de l'email
       render json: @reservation, status: :ok
     else
       render json: { errors: @reservation.errors.full_messages }, status: :unprocessable_entity

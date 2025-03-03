@@ -1,23 +1,37 @@
 class Api::PersonnelsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
   before_action :set_personnel, only: [:show, :update, :destroy]
   
   # Récupérer la liste des employés
   def index
-    personnels = Personnel.includes(:shops, :salons).all
+    personnels = Personnel.includes(:shops, :salons).all.page(params[:page]).per(10)
     render json: personnels, include: [:shops, :salons]
   end
 
   # Créer un personnel et l'affecter à un ou plusieurs salons/shops
   def create
-    personnel = Personnel.new(personnel_params)
-    
-    if personnel.save
-      assign_shops_and_salons(personnel)
-      render json: personnel, status: :created
-    else
-      render json: { errors: personnel.errors.full_messages }, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do  # 🔥 Assure que tout se fait ou rien du tout
+      user = User.new(
+        email: personnel_params[:email],
+        password: SecureRandom.hex(8), # 🔥 Génère un mot de passe aléatoire
+        name: "#{personnel_params[:first_name]} #{personnel_params[:last_name]}",
+        compagny_id: 1
+      )
+  
+      if user.save
+        
+        personnel = user.create_personnel(personnel_params)  # Associe le personnel au user
+        UserMailer.welcome_email(user, user.password).deliver_later
+  
+        if personnel.persisted?
+          render json: { message: 'Personnel et compte utilisateur créés', personnel: personnel, user: user }, status: :created
+        else
+          render json: { errors: personnel.errors.full_messages }, status: :unprocessable_entity
+        end
+      else
+        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+      end
     end
   end
 

@@ -1,12 +1,12 @@
 class Api::ProductsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
   before_action :set_shop
   before_action :set_product, only: [:update, :destroy]
 
   # ✅ Liste des produits d'une boutique
   def index
-    products = @shop.products
+    products = @shop.products.page(params[:page]).per(10)
     render json: products, status: :ok
   end
 

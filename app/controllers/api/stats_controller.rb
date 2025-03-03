@@ -1,5 +1,5 @@
 class Api::StatsController < ApplicationController
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
 
   def sales_by_channel
     stats = Sale.group(:channel).count

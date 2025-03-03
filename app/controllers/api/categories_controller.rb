@@ -1,6 +1,6 @@
 class Api::CategoriesController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user!
+  before_action :authenticate_user_token_token!
   before_action :set_shop
   before_action :set_category, only: [:update, :destroy]
 

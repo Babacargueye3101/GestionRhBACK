@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :shops, dependent: :destroy
   belongs_to :compagny
   has_many :availabilities
+  has_one :personnel, dependent: :destroy  # Un user peut être un personnel
   enum role: { admin: 'admin', manager: 'manager', employee: 'employee' }
 
   after_initialize :set_default_role, if: :new_record?

@@ -70,7 +70,11 @@ Rails.application.routes.draw do
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
-      resources :sales, only: [:index, :create, :update, :destroy, :show]
+      resources :sales, only: [:index, :create, :update, :destroy, :show] do
+        member do
+          get 'download_invoice' # Ajout de la route pour télécharger la facture
+        end
+      end
       resources :categories, only: [:index, :create, :update, :destroy]
       resources :salons do
         resources :services
@@ -92,6 +96,14 @@ Rails.application.routes.draw do
     end
     resources :availabilities, only: [:index, :destroy]
     resources :personnels, only: [:index, :show, :create, :update, :destroy]
+    resources :subscription_types, only: [:index, :create, :update, :destroy] do
+      member do
+        post 'subsrciption_by_client' # Ajout de la route pour souscription d un client
+      end
+    end
+    resources :subscriptions, only: [:index, :create, :update, :destroy]
+    resources :channels
+    resources :payment_methodes
   end
 
 end
