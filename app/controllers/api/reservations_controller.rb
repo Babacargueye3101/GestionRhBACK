@@ -3,7 +3,40 @@ class Api::ReservationsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!, only: [:show, :update]
   before_action :set_reservation, only: [:show, :update]
+  before_action :set_shop_and_salon, only: [:index]
   #Contrôleur pour les clients (prise de rendez-vous)
+  
+  def index
+    availabilities = @salon.availabilities.includes(:reservations).order(:created_at).page(params[:page]).per(10)
+    reservations = availabilities.flat_map(&:reservations) # Récupérer toutes les réservations des disponibilités du salon
+    the_reservations = reservations.map do |reservation|
+      {
+        id: reservation.id,
+        date: reservation.availability&.date,
+        time: reservation.time,
+        status: reservation.status,
+        client: {
+          id: reservation.client&.id,
+          name: reservation.client&.name,
+          prenom: reservation.client&.surname,
+          email: reservation.client&.email,
+          phone: reservation.client&.phone
+        },
+        salon: {
+          id: reservation.availability&.salon&.id,
+          name: reservation.availability&.salon&.name
+        },
+        shop: {
+          id: reservation.availability&.salon&.shop&.id,
+          name: reservation.availability&.salon&.shop&.name
+        }
+      }
+    end
+  
+    render json: the_reservations
+  end
+  
+
   def create
     existing_client_by_email = Client.find_by(email: client_params[:email])
     existing_client_by_phone = Client.find_by(phone: client_params[:phone])
@@ -63,6 +96,14 @@ class Api::ReservationsController < ApplicationController
 
   def client_params
     params.require(:client).permit(:name, :surname, :email, :phone)
+  end
+
+  def set_shop_and_salon
+    @shop = Shop.find_by(id: params[:shop_id])
+    @salon = @shop&.salons&.find_by(id: params[:salon_id])
+    if @shop.nil? || @salon.nil?
+      render json: { error: "Boutique ou salon introuvable" }, status: :not_found
+    end
   end
 
   def set_reservation
