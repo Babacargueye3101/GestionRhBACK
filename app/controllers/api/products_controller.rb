@@ -6,15 +6,36 @@ class Api::ProductsController < ApplicationController
 
   # ✅ Liste des produits d'une boutique
   def index
-    products = @shop.products.page(params[:page]).per(10)
-    render json: products, status: :ok
+    products = @shop.products.with_attached_image.page(params[:page]).per(10)
+  
+    the_products = products.map do |product|
+      {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        stock: product.stock,
+        category: {
+          id: product.category&.id,
+          name: product.category&.name
+        },
+        image_url: product.image.attached? ? url_for(product.image) : nil
+      }
+    end
+  
+    render json: the_products, status: :ok
   end
 
   # ✅ Création d'un produit
   def create
-    product = @shop.products.create(product_params)
-    if product.persisted?
-      render json: product, status: :created
+    product = @shop.products.new(product_params)
+
+    if params[:image].present?
+      product.image.attach(params[:image])  # 📸 Attache l'image si elle est présente
+    end
+  
+    if product.save
+      render json: product_with_image_url(product), status: :created
     else
       render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
     end
@@ -23,7 +44,21 @@ class Api::ProductsController < ApplicationController
   # ✅ Mise à jour d'un produit
   def update
     if @product.update(product_params)
-      render json: @product, status: :ok
+      # Gestion de l'image si un fichier est envoyé
+      @product.image.attach(params[:image]) if params[:image].present?
+  
+      render json: {
+        id: @product.id,
+        name: @product.name,
+        description: @product.description,
+        price: @product.price,
+        stock: @product.stock,
+        category: {
+          id: @product.category&.id,
+          name: @product.category&.name
+        },
+        image_url: @product.image.attached? ? url_for(@product.image) : nil
+      }, status: :ok
     else
       render json: { errors: @product.errors.full_messages }, status: :unprocessable_entity
     end
@@ -31,9 +66,14 @@ class Api::ProductsController < ApplicationController
 
   # ✅ Suppression d'un produit
   def destroy
-    @product.destroy
-    head :no_content
-  end
+    if @product
+      @product.image.purge if @product.image.attached?  # Supprime l'image attachée
+      @product.destroy
+      render json: { message: "Produit supprimé avec succès" }, status: :ok
+    else
+      render json: { error: "Produit introuvable" }, status: :not_found
+    end
+  end  
 
   private
 
@@ -48,6 +88,17 @@ class Api::ProductsController < ApplicationController
   end
 
   def product_params
-    params.require(:product).permit(:name, :description, :price, :stock, :category_id)
+    params.permit(:name, :description, :price, :stock, :category_id, :image)
+  end
+
+  def product_with_image_url(product)
+    {
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      stock: product.stock,
+      image_url: product.image.attached? ? url_for(product.image) : nil  # 🔥 Génère l'URL de l'image
+    }
   end
 end
