@@ -78,6 +78,7 @@ Rails.application.routes.draw do
       resources :categories, only: [:index, :create, :update, :destroy]
       resources :salons do
         resources :services
+        resources :availabilities, only: [:index] # Ajout de la route pour récupérer les dispos d'un salon spécifique
       end
     end
 

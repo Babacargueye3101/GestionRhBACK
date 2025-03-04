@@ -6,7 +6,17 @@ class Api::AvailabilitiesController < ApplicationController
   #Contrôleur pour l'admin (création des disponibilités)
 
   def index
-    availabilities = Availability.left_joins(:reservations)
+  shop_id = params[:shop_id]
+  salon_id = params[:salon_id]
+
+  # Vérifier si la boutique et le salon existent
+  shop = Shop.find_by(id: shop_id)
+  salon = shop&.salons&.find_by(id: salon_id)
+
+  if shop.nil? || salon.nil?
+    return render json: { error: "Boutique ou salon introuvable" }, status: :not_found
+  end
+    availabilities = salon.availabilities.left_joins(:reservations)
                                  .where(reservations: { id: nil }) # Exclut celles déjà réservées
                                  .order(:date).page(params[:page]).per(10)
     the_avaibilities = availabilities.map do |availability|
@@ -17,6 +27,10 @@ class Api::AvailabilitiesController < ApplicationController
         salon: {
           id: availability&.salon&.id,
           name: availability&.salon&.name
+        },
+        shop: {
+          id: availability&.salon&.shop&.id,
+          name: availability&.salon&.shop&.name
         }
       }
     end
@@ -42,7 +56,7 @@ class Api::AvailabilitiesController < ApplicationController
       availability.destroy
       render json: { message: "Disponibilité supprimée" }, status: :ok
     end
-  end  
+  end
 
   private
 
