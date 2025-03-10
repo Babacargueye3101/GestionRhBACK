@@ -76,6 +76,7 @@ class Api::ReservationsController < ApplicationController
     else
       data = {
         "reservation" => @reservation,
+        "availability" => @reservation.availability,
         "client" => @reservation.client
       }
       render json: data
