@@ -67,6 +67,8 @@ Rails.application.routes.draw do
 
     resources :documents
 
+    get 'public/category/:id/products', to: 'home#products_by_category'
+    get 'public/all_products', to: 'home#all_products'
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
@@ -106,6 +108,14 @@ Rails.application.routes.draw do
     resources :subscriptions, only: [:index, :create, :update, :destroy]
     resources :channels
     resources :payment_methodes
+    resources :clients do
+      member do
+        get 'reservations'
+      end
+      collection do
+        get 'deleted_clients' # Ajout de la route pour récupérer les clients marqués comme supprimés
+      end
+    end
   end
 
 end
