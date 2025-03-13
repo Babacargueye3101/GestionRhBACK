@@ -103,6 +103,7 @@ Rails.application.routes.draw do
     resources :subscription_types, only: [:index, :create, :update, :destroy] do
       member do
         post 'subsrciption_by_client' # Ajout de la route pour souscription d un client
+        get 'clients', to: 'subscriptions#clients_by_subscription_type' # Ajout de la route pour récupérer les clients souscrits à un type d'abonnement
       end
     end
     resources :subscriptions, only: [:index, :create, :update, :destroy]

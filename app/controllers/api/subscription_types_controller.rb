@@ -4,7 +4,7 @@ class Api::SubscriptionTypesController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!, only: [:update, :create, :destroy]
   def index
-    render json: SubscriptionType.all
+    render json: SubscriptionType.active
   end
 
   def create
@@ -25,7 +25,7 @@ class Api::SubscriptionTypesController < ApplicationController
   end
 
   def destroy
-    @subscription_type.update(active: false)
+    @subscription_type.update(deleted: true)
     render json: { message: "Type d'abonnement désactivé" }
   end
 
