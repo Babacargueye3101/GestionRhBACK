@@ -1,6 +1,6 @@
 class Api::HomeController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products]
+  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories]
     
   # ✅ Récupérer les produits par catégorie
   def products_by_category
@@ -52,5 +52,10 @@ class Api::HomeController < ApplicationController
     end
 
     render json: the_products, status: :ok
+  end
+
+  def all_categories
+    categories = Category.all
+    render json: categories, status: :ok
   end
 end

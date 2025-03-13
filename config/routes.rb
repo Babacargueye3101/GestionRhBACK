@@ -69,6 +69,7 @@ Rails.application.routes.draw do
 
     get 'public/category/:id/products', to: 'home#products_by_category'
     get 'public/all_products', to: 'home#all_products'
+    get 'public/all_categories', to: 'home#all_categories'
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
