@@ -1,6 +1,6 @@
 class Api::HomeController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories]
+  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories, :all_shops, :salons_by_shop]
     
   # ✅ Récupérer les produits par catégorie
   def products_by_category
@@ -57,5 +57,23 @@ class Api::HomeController < ApplicationController
   def all_categories
     categories = Category.all
     render json: categories, status: :ok
+  end
+
+  # ✅ Lister toutes les boutiques
+  def all_shops
+    shops = Shop.all
+    render json: shops, status: :ok
+  end
+
+  # ✅ Récupérer les salons liés à une boutique
+  def salons_by_shop
+    shop = Shop.find_by(id: params[:shop_id])
+    if shop.nil?
+      render json: { error: "Shop not found" }, status: :not_found
+      return
+    end
+
+    salons = shop.salons
+    render json: salons, status: :ok
   end
 end

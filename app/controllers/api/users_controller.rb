@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create, :update, :destroy, :update_role]
-  before_action :set_user, only: [:update_role]
+  before_action :set_user, only: [:update_role, :update_password]
 
   def index
     @users = User.all
@@ -15,6 +15,18 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  # ✅ Méthode pour mettre à jour le mot de passe de l'utilisateur
+  def update_password
+    if @user.valid_password?(params[:current_password])
+      if @user.update(password: params[:new_password])
+        render json: { message: "Mot de passe mis à jour avec succès" }, status: :ok
+      else
+        render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Mot de passe actuel incorrect" }, status: :unauthorized
+    end
+  end
   private
 
   def set_user

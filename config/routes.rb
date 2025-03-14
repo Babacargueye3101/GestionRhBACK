@@ -27,6 +27,7 @@ Rails.application.routes.draw do
     resources :users do
       member do
         patch :update_role
+        patch :update_password # Ajout de la route pour mettre à jour le mot de passe
       end
     end
     #route for Compagny
@@ -70,6 +71,8 @@ Rails.application.routes.draw do
     get 'public/category/:id/products', to: 'home#products_by_category'
     get 'public/all_products', to: 'home#all_products'
     get 'public/all_categories', to: 'home#all_categories'
+    get 'public/all_shops', to: 'home#all_shops' # Ajout de la route pour lister toutes les boutiques
+    get 'public/shops/:shop_id/salons', to: 'home#salons_by_shop' # Ajout de la route pour récupérer les salons liés à une boutique
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
