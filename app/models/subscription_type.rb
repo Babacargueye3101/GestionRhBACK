@@ -5,7 +5,7 @@ class SubscriptionType < ApplicationRecord
   validates :letter, uniqueness: true, length: { is: 1 }
   validates :price, numericality: { greater_than_or_equal_to: 0 }
   # Scope pour récupérer les types d'abonnement non supprimés
-  scope :active, -> { where(deleted: false) }
+  scope :active, -> { where(deleted: false, active: true) }
 
   # Scope pour récupérer les types d'abonnement supprimés
   scope :deleted, -> { where(deleted: true) }
