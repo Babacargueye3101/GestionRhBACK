@@ -98,6 +98,7 @@ Rails.application.routes.draw do
         get 'payment_usage_stats'
         get 'sales_by_employee'
         get 'all_personnel'
+        get 'summary_stats'
       end
     end
     resources :reservations, only: [:create, :update, :show]
