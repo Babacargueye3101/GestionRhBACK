@@ -1,6 +1,6 @@
 class Api::HomeController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
-  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories, :all_shops, :salons_by_shop]
+  before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories, :all_shops, :salons_by_shop, :create_order]
     
   # ✅ Récupérer les produits par catégorie
   def products_by_category
@@ -75,5 +75,34 @@ class Api::HomeController < ApplicationController
 
     salons = shop.salons
     render json: salons, status: :ok
+  end
+
+  # ✅ Créer une commande
+  def create_order
+    ActiveRecord::Base.transaction do
+      order = Order.new(
+        client_name: params[:client][:name],
+        client_phone: params[:client][:phone],
+        client_address: params[:client][:address],
+        total: params[:total].delete('$').to_f,
+        payment_method: params[:payment][:paymentMethod],
+        mobile_phone: params[:payment][:mobilePhone],
+        status: 'pending'
+      )
+
+      if order.save
+        params[:products].each do |product_params|
+          product = Product.find(product_params[:id])
+          order.order_items.create!(
+            product: product,
+            quantity: 1, # Vous pouvez ajuster la quantité selon vos besoins
+            price: product_params[:price].to_f
+          )
+        end
+        render json: order, include: :order_items, status: :created
+      else
+        render json: { errors: order.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
   end
 end

@@ -73,6 +73,7 @@ Rails.application.routes.draw do
     get 'public/all_categories', to: 'home#all_categories'
     get 'public/all_shops', to: 'home#all_shops' # Ajout de la route pour lister toutes les boutiques
     get 'public/shops/:shop_id/salons', to: 'home#salons_by_shop' # Ajout de la route pour récupérer les salons liés à une boutique
+    post 'public/create_order', to: 'home#create_order' # Ajout de la route pour créer une commande
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
@@ -96,6 +97,7 @@ Rails.application.routes.draw do
         get 'top_sales_and_loyal_customers'
         get 'payment_usage_stats'
         get 'sales_by_employee'
+        get 'all_personnel'
       end
     end
     resources :reservations, only: [:create, :update, :show]
@@ -119,6 +121,11 @@ Rails.application.routes.draw do
       end
       collection do
         get 'deleted_clients' # Ajout de la route pour récupérer les clients marqués comme supprimés
+      end
+    end
+    resources :orders, only: [:index, :show, :destroy] do
+      member do
+        patch :update_status # Ajout de la route pour mettre à jour le statut de la commande
       end
     end
   end

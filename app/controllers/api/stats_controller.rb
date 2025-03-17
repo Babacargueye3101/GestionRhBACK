@@ -38,4 +38,9 @@ class Api::StatsController < ApplicationController
     stats = Sale.group(:user_id).count
     render json: { sales_by_employee: stats }, status: :ok
   end
+
+  def all_personnel
+    personnnels = Personnel.all
+    render json: { count: personnnels.count }, status: :ok
+  end
 end
