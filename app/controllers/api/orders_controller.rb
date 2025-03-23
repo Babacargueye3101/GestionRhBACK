@@ -17,6 +17,7 @@ class Api::OrdersController < ApplicationController
       client_address: order.client_address,
       total: order.total,
       status: order.status,
+      paid: order.paid,
       payment_method: order.payment_method,
       mobile_phone: order.mobile_phone,
       order_items: order.order_items.map do |item|
@@ -53,6 +54,10 @@ class Api::OrdersController < ApplicationController
         order.order_items.each do |item|
           product = item.product
           product.update(stock: product.stock - item.quantity)
+        end
+        # Marquer la commande comme payée si mobile_phone est vide
+        if order.mobile_phone.blank?
+          order.update(paid: true)
         end
       end
       render json: { message: "Order status updated successfully" }, status: :ok

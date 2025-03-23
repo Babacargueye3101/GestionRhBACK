@@ -101,6 +101,7 @@ Rails.application.routes.draw do
         get 'summary_stats'
       end
     end
+    resources :time_slots, only: [:index, :create] # Routes pour les horaires
     resources :reservations, only: [:create, :update, :show]
     resources :salons do
       resources :availabilities, only: [:create]

@@ -89,6 +89,17 @@ class Api::HomeController < ApplicationController
         mobile_phone: params[:payment][:mobilePhone],
         status: 'pending'
       )
+      #ici on regarde si mobilephone est present
+      # if params[:payment][:mobilePhone].present?
+      #   # # Simuler un appel à l'API Wave pour effectuer le paiement
+      #   payment_response = process_wave_payment(params[:payment][:mobilePhone], order.total)
+      #   if payment_response[:success]
+      #     order.paid = true # Marquer la commande comme payée
+      #   else
+      #     render json: { error: "Échec du paiement via Wave : #{payment_response[:message]}" }, status: :unprocessable_entity
+      #     return
+      #   end
+      # end
 
       if order.save
         params[:products].each do |product_params|
@@ -103,6 +114,19 @@ class Api::HomeController < ApplicationController
       else
         render json: { errors: order.errors.full_messages }, status: :unprocessable_entity
       end
+    end
+  end
+
+  private
+
+  # Simuler un appel à l'API Wave pour effectuer le paiement
+  def process_wave_payment(mobile_phone, amount)
+    # Simuler une requête HTTP vers l'API Wave
+    # Remplacez cette logique par un appel réel à l'API Wave si nécessaire
+    if mobile_phone == "valid_number" # Simuler un numéro valide
+      { success: true, token: "wave_payment_token" }
+    else
+      { success: false, message: "Numéro de téléphone invalide ou solde insuffisant" }
     end
   end
 end
