@@ -5,7 +5,7 @@ require 'json'
 class OrangeMoneyService
   BASE_URL = "https://api.sandbox.orange-sonatel.com/api/eWallet/v1/payments/onestep"
   CLIENT_ID = ENV['CLIENT_ID']
-  CLIENT_SECRET = ENV['PARTNER_ID']
+  CLIENT_SECRET = ENV['CLIENT_SECRET']
 
   def initialize
     @token = authenticate
