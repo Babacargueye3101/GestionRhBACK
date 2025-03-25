@@ -3,6 +3,7 @@ class Product < ApplicationRecord
   belongs_to :category
   has_many :sale_items
   has_many :sales, through: :sale_items
+  has_many :variants, dependent: :destroy  # ✅ Un produit peut avoir plusieurs variantes
   has_one_attached :image  # 📸 Gère une image unique par produit
   validates :name, presence: true
   validates :description, presence: true

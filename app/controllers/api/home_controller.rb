@@ -2,15 +2,13 @@ class Api::HomeController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories, :all_shops, :salons_by_shop, :create_order]
     
-  # ✅ Récupérer les produits par catégorie
+  # ✅ Version mise à jour de products_by_category avec variantes
   def products_by_category
     category = Category.find_by(id: params[:id])
-    if category.nil?
-      render json: { error: "Category not found" }, status: :not_found
-      return
-    end
+    return render json: { error: "Category not found" }, status: :not_found unless category
 
-    products = category.products.with_attached_image.page(params[:page]).per(10)
+    products = category.products.includes(:shop, :variants, image_attachment: :blob)
+    
     the_products = products.map do |product|
       {
         id: product.id,
@@ -22,16 +20,24 @@ class Api::HomeController < ApplicationController
           id: product.category&.id,
           name: product.category&.name
         },
-        image_url: product.image.attached? ? url_for(product.image) : nil
+        image_url: product.image.attached? ? url_for(product.image) : nil,
+        variants: product.variants.load.map do |variant|
+          {
+            id: variant.id,
+            name: variant.name,
+            stock: variant.stock
+          }
+        end
       }
     end
 
     render json: the_products, status: :ok
-  end 
+  end
 
-  # ✅ Lister tous les produits de toutes les boutiques
+  # ✅ Version mise à jour de all_products avec variantes
   def all_products
-    products = Product.includes(:shop, :category, image_attachment: :blob).all
+    products = Product.includes(:shop, :category, :variants, image_attachment: :blob).all
+    
     the_products = products.map do |product|
       {
         id: product.id,
@@ -47,7 +53,14 @@ class Api::HomeController < ApplicationController
           id: product.category&.id,
           name: product.category&.name
         },
-        image_url: product.image.attached? ? url_for(product.image) : nil
+        image_url: product.image.attached? ? url_for(product.image) : nil,
+        variants:  product.variants.load.map do |variant|
+          {
+            id: variant.id,
+            name: variant.name,
+            stock: variant.stock
+          }
+        end
       }
     end
 
@@ -77,9 +90,9 @@ class Api::HomeController < ApplicationController
     render json: salons, status: :ok
   end
 
-  # ✅ Créer une commande
   def create_order
     ActiveRecord::Base.transaction do
+      # Création de la commande
       order = Order.new(
         client_name: params[:client][:name],
         client_phone: params[:client][:phone],
@@ -94,34 +107,74 @@ class Api::HomeController < ApplicationController
 
       if order.save
         params[:products].each do |product_params|
-          product = Product.find(product_params[:id])
-          order.order_items.create!(
-            product: product,
-            quantity: 1, # Vous pouvez ajuster la quantité selon vos besoins
-            price: product_params[:price].to_f
-          )
+          if product_params[:variant_id].present?
+            # Cas où le client a choisi une variante spécifique
+            variant = Variant.find(product_params[:variant_id])
+            
+            # Vérification du stock de la variante
+            if variant.stock < product_params[:quantity].to_i
+              raise ActiveRecord::Rollback, "Stock insuffisant pour la variante #{variant.name}"
+            end
+            
+            # Création de l'item de commande avec la variante
+            order.order_items.create!(
+              product: variant.product,
+              variant: variant,
+              quantity: product_params[:quantity].to_i,
+              price: product_params[:price].to_f,
+              variant_details: variant.name # Stocker les infos de la variante
+            )
+            
+            # Mise à jour du stock de la variante
+            variant.update!(stock: variant.stock - product_params[:quantity].to_i)
+            
+            # Mise à jour du stock général du produit si nécessaire
+            # (selon votre logique métier)
+            variant.product.update!(stock: variant.product.stock - product_params[:quantity].to_i)
+          else
+            # Cas où le client a choisi le produit sans variante spécifique
+            product = Product.find(product_params[:id])
+            
+            # Vérification du stock du produit
+            if product.stock < product_params[:quantity].to_i
+              raise ActiveRecord::Rollback, "Stock insuffisant pour le produit #{product.name}"
+            end
+            
+            # Création de l'item de commande sans variante
+            order.order_items.create!(
+              product: product,
+              quantity: product_params[:quantity].to_i,
+              price: product_params[:price].to_f
+            )
+            
+            # Mise à jour du stock du produit
+            product.update!(stock: product.stock - product_params[:quantity].to_i)
+          end
         end
-        # Initier le paiement Orange Money
-        if params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
+  
+        # Paiement Orange Money (garder votre logique existante)
+        unless params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
           om_service = OrangeMoneyService.new
           payment_response = om_service.initiate_payment(
             params[:payment][:mobilePhone],
             order.total,
-            SecureRandom.uuid, # Générer une référence unique
-            params[:payment][:otp] # OTP fourni par l'utilisateur
+            SecureRandom.uuid,
+            params[:payment][:otp]
           )
-
+  
           if payment_response && payment_response["status"] == "SUCCESS"
-            order.update(paid: true, status: 'paid')
+            order.update!(paid: true, status: 'paid')
           else
-            return render json: { error: "Échec du paiement Orange Money" }, status: :unprocessable_entity
+            raise ActiveRecord::Rollback, "Échec du paiement Orange Money"
           end
         end
-
-        render json: order, include: :order_items, status: :created
+  
+        render json: order, include: { order_items: { include: [:product, :variant] } }, status: :created
       else
         render json: { errors: order.errors.full_messages }, status: :unprocessable_entity
       end
+    rescue ActiveRecord::Rollback => e
+      render json: { error: e.message }, status: :unprocessable_entity
     end
   end
 

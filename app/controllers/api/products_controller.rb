@@ -2,11 +2,11 @@ class Api::ProductsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!
   before_action :set_shop
-  before_action :set_product, only: [:update, :destroy]
+  before_action :set_product, only: [:update, :destroy, :show]
 
   # ✅ Liste des produits d'une boutique
   def index
-    products = @shop.products.with_attached_image.page(params[:page]).per(10)
+    products = @shop.products.with_attached_image
   
     the_products = products.map do |product|
       {
@@ -27,19 +27,35 @@ class Api::ProductsController < ApplicationController
   end
 
   # ✅ Création d'un produit
-  def create
-    product = @shop.products.new(product_params)
+  # def create
+  #   product = @shop.products.new(product_params)
 
-    if params[:image].present?
-      product.image.attach(params[:image])  # 📸 Attache l'image si elle est présente
-    end
+  #   if params[:image].present?
+  #     product.image.attach(params[:image])  # 📸 Attache l'image si elle est présente
+  #   end
   
-    if product.save
-      render json: product_with_image_url(product), status: :created
-    else
-      render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
+  #   if product.save
+  #     render json: product_with_image_url(product), status: :created
+  #   else
+  #     render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
+  #   end
+  # end
+
+    # ✅ Création d'un produit avec variantes
+    def create
+      product = @shop.products.new(product_params)
+    
+      product.image.attach(params[:image]) if params[:image].present?
+    
+      if product.save
+        create_variants(product)  # ✅ Créer les variantes après avoir sauvegardé le produit
+    
+        render json: product_with_variants(product), status: :created
+      else
+        render json: { errors: product.errors.full_messages }, status: :unprocessable_entity
+      end
+    end  
+       
 
   # ✅ Mise à jour d'un produit
   def update
@@ -73,7 +89,12 @@ class Api::ProductsController < ApplicationController
     else
       render json: { error: "Produit introuvable" }, status: :not_found
     end
-  end  
+  end 
+
+    # ✅ Afficher un produit avec ses variantes
+    def show
+      render json: product_with_variants(@product), status: :ok
+    end
 
   private
 
@@ -90,15 +111,60 @@ class Api::ProductsController < ApplicationController
   def product_params
     params.permit(:name, :description, :price, :stock, :category_id, :image)
   end
+  # ✅ Gestion des paramètres pour les variantes
+  def variants_params
+    return [] unless params[:variants].present?
+    
+    params[:variants].values.map do |variant|
+      variant.permit(:name, :stock)
+    end
+  end  
 
-  def product_with_image_url(product)
+  # ✅ Créer des variantes pour un produit
+  def create_variants(product)
+    variants_params.each_with_index do |variant_param, index|
+      variant = product.variants.create(variant_param)
+    end
+  end
+  
+
+  # ✅ Mettre à jour les variantes d'un produit
+  def update_variants(product)
+    product.variants.destroy_all
+    create_variants(product)
+  end
+
+  # ✅ Retourne un produit avec ses variantes
+  def product_with_variants(product)
     {
       id: product.id,
       name: product.name,
       description: product.description,
       price: product.price,
       stock: product.stock,
-      image_url: product.image.attached? ? url_for(product.image) : nil  # 🔥 Génère l'URL de l'image
+      category: {
+        id: product.category&.id,
+        name: product.category&.name
+      },
+      image_url: product.image.attached? ? url_for(product.image) : nil,
+      variants: product.variants.map do |variant|
+        {
+          id: variant.id,
+          name: variant.name,
+          stock: variant.stock
+        }
+      end
     }
   end
+
+  # def product_with_image_url(product)
+  #   {
+  #     id: product.id,
+  #     name: product.name,
+  #     description: product.description,
+  #     price: product.price,
+  #     stock: product.stock,
+  #     image_url: product.image.attached? ? url_for(product.image) : nil  # 🔥 Génère l'URL de l'image
+  #   }
+  # end
 end
