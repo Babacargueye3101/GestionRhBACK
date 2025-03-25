@@ -87,6 +87,7 @@ class Api::HomeController < ApplicationController
         total: params[:total].delete('$').to_f,
         payment_method: params[:payment][:paymentMethod],
         mobile_phone: params[:payment][:mobilePhone],
+        payement_type: params[:payment][:paymentType],
         status: 'pending'
       )
 
