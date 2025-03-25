@@ -89,17 +89,7 @@ class Api::HomeController < ApplicationController
         mobile_phone: params[:payment][:mobilePhone],
         status: 'pending'
       )
-      #ici on regarde si mobilephone est present
-      # if params[:payment][:mobilePhone].present?
-      #   # # Simuler un appel à l'API Wave pour effectuer le paiement
-      #   payment_response = process_wave_payment(params[:payment][:mobilePhone], order.total)
-      #   if payment_response[:success]
-      #     order.paid = true # Marquer la commande comme payée
-      #   else
-      #     render json: { error: "Échec du paiement via Wave : #{payment_response[:message]}" }, status: :unprocessable_entity
-      #     return
-      #   end
-      # end
+
 
       if order.save
         params[:products].each do |product_params|
@@ -110,6 +100,23 @@ class Api::HomeController < ApplicationController
             price: product_params[:price].to_f
           )
         end
+        # Initier le paiement Orange Money
+        if params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
+          om_service = OrangeMoneyService.new
+          payment_response = om_service.initiate_payment(
+            params[:payment][:mobilePhone],
+            order.total,
+            SecureRandom.uuid, # Générer une référence unique
+            params[:payment][:otp] # OTP fourni par l'utilisateur
+          )
+
+          if payment_response && payment_response["status"] == "SUCCESS"
+            order.update(paid: true, status: 'paid')
+          else
+            return render json: { error: "Échec du paiement Orange Money" }, status: :unprocessable_entity
+          end
+        end
+
         render json: order, include: :order_items, status: :created
       else
         render json: { errors: order.errors.full_messages }, status: :unprocessable_entity
