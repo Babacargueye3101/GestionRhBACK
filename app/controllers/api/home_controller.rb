@@ -97,7 +97,7 @@ class Api::HomeController < ApplicationController
         client_name: params[:client][:name],
         client_phone: params[:client][:phone],
         client_address: params[:client][:address],
-        total: params[:total].delete('$').to_f,
+        total: params[:total].to_f,
         payment_method: params[:payment][:paymentMethod],
         mobile_phone: params[:payment][:mobilePhone],
         payement_type: params[:payment][:paymentType],
@@ -144,7 +144,7 @@ class Api::HomeController < ApplicationController
             order.order_items.create!(
               product: product,
               quantity: product_params[:quantity].to_i,
-              price: product_params[:price].to_f
+              price: product_params[:unitPrice].to_f
             )
             
             # Mise à jour du stock du produit
@@ -153,7 +153,7 @@ class Api::HomeController < ApplicationController
         end
   
         # Paiement Orange Money (garder votre logique existante)
-        unless params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
+        if params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
           om_service = OrangeMoneyService.new
           payment_response = om_service.initiate_payment(
             params[:payment][:mobilePhone],
@@ -167,6 +167,17 @@ class Api::HomeController < ApplicationController
           else
             raise ActiveRecord::Rollback, "Échec du paiement Orange Money"
           end
+        elsif params[:payment][:paymentMethod] == 'wave'
+          # wave_payment = process_wave_payment(params[:payment][:mobilePhone], order.total)
+          # if wave_payment[:success]
+          #   order.update!(paid: true, status: 'paid')
+          # else
+          #   raise ActiveRecord::Rollback, wave_payment[:message]
+          # end
+        else
+          order.update!(paid: false)
+         # render json: { message: "Commande bien reçu" }, status: :ok
+         # return
         end
   
         render json: order, include: { order_items: { include: [:product, :variant] } }, status: :created
