@@ -1,7 +1,7 @@
 class Api::ProductsController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!
-  before_action :set_shop
+  before_action :set_shop, except: [:pending_orders]
   before_action :set_product, only: [:update, :destroy, :show]
 
   # ✅ Liste des produits d'une boutique
@@ -96,6 +96,18 @@ class Api::ProductsController < ApplicationController
       render json: product_with_variants(@product), status: :ok
     end
 
+    def pending_orders
+      orders = Order.where(status: "pending")
+                   .order(created_at: :desc)
+                   .limit(10)
+                   .includes(:order_items)
+
+      data = {
+        orders: orders,
+        total: orders.count
+      }
+      render json: data, status: :ok
+    end
   private
 
   def set_shop

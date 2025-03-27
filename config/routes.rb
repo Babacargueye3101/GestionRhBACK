@@ -74,6 +74,7 @@ Rails.application.routes.draw do
     get 'public/all_shops', to: 'home#all_shops' # Ajout de la route pour lister toutes les boutiques
     get 'public/shops/:shop_id/salons', to: 'home#salons_by_shop' # Ajout de la route pour récupérer les salons liés à une boutique
     post 'public/create_order', to: 'home#create_order' # Ajout de la route pour créer une commande
+    get 'products/pending', to: 'products#pending_orders' # Ajout de la route pour récupérer les commandes en attente
     resources :shops, only: [:index, :create, :update, :destroy, :stock_summary] do
       get 'stock_summary', on: :member
       resources :products, only: [:index, :create, :update, :destroy]
