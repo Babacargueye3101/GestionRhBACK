@@ -4,13 +4,19 @@ class Api::SubscriptionTypesController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!, only: [:update, :create, :destroy]
   def index
-    render json: SubscriptionType.active
+    subscription_types = SubscriptionType.all
+    render json: subscription_types.map { |s| subscription_type_json(s) }, status: :ok
   end
 
   def create
     subscription_type = SubscriptionType.new(subscription_type_params)
+
+    if params[:image].present?
+      subscription_type.image.attach(params[:image])
+    end
+
     if subscription_type.save
-      render json: subscription_type, status: :created
+      render json: subscription_type_json(subscription_type), status: :created
     else
       render json: { errors: subscription_type.errors.full_messages }, status: :unprocessable_entity
     end
@@ -18,7 +24,11 @@ class Api::SubscriptionTypesController < ApplicationController
 
   def update
     if @subscription_type.update(subscription_type_params)
-      render json: @subscription_type
+      if params[:image].present?
+        @subscription_type.image.purge
+        @subscription_type.image.attach(params[:image])
+      end
+      render json: subscription_type_json(@subscription_type)
     else
       render json: { errors: @subscription_type.errors.full_messages }, status: :unprocessable_entity
     end
@@ -58,11 +68,23 @@ class Api::SubscriptionTypesController < ApplicationController
   end
 
   def subscription_type_params
-    params.require(:subscription_type).permit(:name, :price, :description, :letter, :active)
+    params.permit(:name, :price, :description, :letter, :active)
   end
 
 
   def client_params
     params.require(:client).permit(:name, :surname, :email, :phone)
+  end
+
+  def subscription_type_json(s)
+    {
+      id: s.id,
+      name: s.name,
+      price: s.price,
+      description: s.description,
+      letter: s.letter,
+      active: s.active,
+      image_url: s.image.attached? ? url_for(s.image) : nil
+    }
   end
 end

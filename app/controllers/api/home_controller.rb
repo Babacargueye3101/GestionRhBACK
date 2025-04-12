@@ -146,9 +146,10 @@ class Api::HomeController < ApplicationController
               quantity: product_params[:quantity].to_i,
               price: product_params[:unitPrice].to_f
             )
-            
+       
+            stock = product.stock - product_params[:quantity].to_i
             # Mise à jour du stock du produit
-            product.update!(stock: product.stock - product_params[:quantity].to_i)
+            product.update!(stock: stock)
           end
         end
   

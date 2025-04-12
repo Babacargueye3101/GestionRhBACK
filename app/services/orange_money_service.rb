@@ -3,7 +3,7 @@ require 'uri'
 require 'json'
 
 class OrangeMoneyService
-  BASE_URL = "https://api.sandbox.orange-sonatel.com/api/eWallet/v1/payments/onestep"
+  BASE_URL = "https://api.orange-sonatel.com/api/eWallet/v1/payments/onestep"
   CLIENT_ID = ENV['CLIENT_ID']
   CLIENT_SECRET = ENV['CLIENT_SECRET']
 
@@ -12,14 +12,27 @@ class OrangeMoneyService
   end
 
   def authenticate
-    auth_url = "https://api.sandbox.orange-sonatel.com/oauth/token"
-    uri = URI(auth_url)
-    request = Net::HTTP::Post.new(uri)
-    request["Content-Type"] = "application/x-www-form-urlencoded"
-    request.body = "grant_type=client_credentials&client_id=#{CLIENT_ID}&client_secret=#{CLIENT_SECRET}"
+    auth_url = "https://api.orange-sonatel.com/oauth/token"
+    
+    begin
+      uri = URI.parse(auth_url)
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true if uri.scheme == 'https'
+  
+      request = Net::HTTP::Post.new(uri.request_uri)
+      request['Content-Type'] = 'application/x-www-form-urlencoded'
+      request.body = URI.encode_www_form(
+        grant_type: 'client_credentials',
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET
+      )
 
-    response = send_request(uri, request)
-    response["access_token"] if response && response["access_token"]
+      response = send_request(uri, request)
+      response['access_token']
+    rescue => e
+      Rails.logger.error "Orange Money Auth Error: #{e.message}"
+      raise
+    end
   end
 
   def initiate_payment(phone_number, amount, reference, otp)
@@ -31,8 +44,8 @@ class OrangeMoneyService
     body = {
       customer: {
         idType: "MSISDN",
-        id: "784310088",
-        otp: "715255"
+        id: phone_number,
+        otp: otp
       },
       partner: {
         idType: "CODE",
@@ -46,9 +59,6 @@ class OrangeMoneyService
     }
 
     request.body = body.to_json
-    ap "*"*10
-    ap request.body
-    ap "*"*10
     send_request(uri, request)
   end
 
@@ -58,10 +68,6 @@ class OrangeMoneyService
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     response = http.request(request)
-    ap "*"*100
-    ap response
-    ap response.body
-    ap "*"*100
     JSON.parse(response.body) rescue nil
   end
 end
