@@ -37,7 +37,7 @@ gem 'kaminari'
 
 # upload file
 #gem 'paperclip', '~> 6.1.0'
-gem 'active_storage'#
+#gem 'active_storage'#
 
 gem 'prawn'
 gem 'prawn-table'
