@@ -48,7 +48,7 @@ Rails.application.configure do
       resource '*',
         headers: :any,
         methods: [:get, :post, :put, :patch, :delete, :options, :head],
-        expose: ['access-token', 'expiry', 'token-type', 'uid', 'client']
+        expose: ['Authorization','access-token', 'expiry', 'token-type', 'uid', 'client']
     end
   end
 
