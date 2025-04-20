@@ -10,10 +10,6 @@ compagny = Compagny.create!(
   description: "Description de la compagnie"
 )
 
-shop = Shop.create!(
-  name: "Boutique Centrale",
-  user: user
-)
 
 # Création d'une entreprise (Compagny)
 compagny = Compagny.create!(
@@ -53,6 +49,11 @@ user3 = User.create!(
   compagny_id: compagny.id   # Association avec l'entreprise créée
 )
 
+
+shop = Shop.create!(
+  name: "Boutique Centrale",
+  user: user3
+)
 # puts "3 utilisateurs créés avec une entreprise !"
 # Seed de catégories
 categories = [
