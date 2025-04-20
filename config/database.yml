@@ -81,7 +81,6 @@ test:
 #
 production:
   <<: *default
-  url: <%= ENV['DATABASE_URL'] %>
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 10 } %>
-  connect_timeout: 10
-  checkout_timeout: 10
+  database: RecrutementBack_production
+  username: RecrutementBack
+  password: <%= ENV['RECRUTEMENTBACK_DATABASE_PASSWORD'] %>
