@@ -1,5 +1,5 @@
 class Api::SessionsController < Devise::SessionsController
-  skip_before_action :verify_authenticity_token, only: [:create, :destroy, :register]
+  skip_before_action :authenticate_user_token_token!, only: [:create, :register]
   respond_to :json
 
   def create
