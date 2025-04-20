@@ -14,15 +14,6 @@ module RecrutementBack
     config.load_defaults 6.1
 
 
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins 'https://galsentech.netlify.app' # Remplacez '*' par votre domaine Angular en production
-        resource '*',
-          headers: :any,
-          methods: [:get, :post, :put, :patch, :delete, :options, :head],
-          expose: ['access-token', 'expiry', 'token-type', 'uid', 'client']
-      end
-    end
 
 
 
