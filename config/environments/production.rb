@@ -42,15 +42,6 @@ Rails.application.configure do
   config.active_storage.service = :local
 
 
-  config.middleware.insert_before 0, Rack::Cors do
-    allow do
-      origins 'https://galsentech.netlify.app' # Remplacez '*' par votre domaine Angular en production
-      resource '*',
-        headers: :any,
-        methods: [:get, :post, :put, :patch, :delete, :options, :head],
-        expose: ['access-token', 'expiry', 'token-type', 'uid', 'client']
-    end
-  end
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
