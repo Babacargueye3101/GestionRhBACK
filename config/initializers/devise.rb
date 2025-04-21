@@ -20,7 +20,6 @@ Devise.setup do |config|
   config.reconfirmable = true
 
 
-  config.allow_insecure_token_lookup = true
 
   config.expire_all_remember_me_on_sign_out = true
 
