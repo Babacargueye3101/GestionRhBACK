@@ -20,7 +20,8 @@ module RecrutementBack
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],
-          expose: ['access-token', 'expiry', 'token-type', 'uid', 'client']
+          expose: ['access-token', 'expiry', 'token-type', 'uid', 'client'],
+          credentials: true
       end
     end
 
