@@ -1,14 +1,14 @@
 class Api::HomeController < ApplicationController
   skip_before_action :verify_authenticity_token  # 🔥 Désactive CSRF
   before_action :authenticate_user_token_token!, except: [:products_by_category, :all_products, :all_categories, :all_shops, :salons_by_shop, :create_order]
-    
+
   # ✅ Version mise à jour de products_by_category avec variantes
   def products_by_category
     category = Category.find_by(id: params[:id])
     return render json: { error: "Category not found" }, status: :not_found unless category
 
     products = category.products.includes(:shop, :variants, image_attachment: :blob)
-    
+
     the_products = products.map do |product|
       {
         id: product.id,
@@ -37,7 +37,7 @@ class Api::HomeController < ApplicationController
   # ✅ Version mise à jour de all_products avec variantes
   def all_products
     products = Product.includes(:shop, :category, :variants, image_attachment: :blob).all
-    
+
     the_products = products.map do |product|
       {
         id: product.id,
@@ -97,7 +97,7 @@ class Api::HomeController < ApplicationController
         client_name: params[:client][:name],
         client_phone: params[:client][:phone],
         client_address: params[:client][:address],
-        total: params[:total].to_f,
+        total: params[:total],
         payment_method: params[:payment][:paymentMethod],
         mobile_phone: params[:payment][:mobilePhone],
         payement_type: params[:payment][:paymentType],
@@ -110,12 +110,12 @@ class Api::HomeController < ApplicationController
           if product_params[:variant_id].present?
             # Cas où le client a choisi une variante spécifique
             variant = Variant.find(product_params[:variant_id])
-            
+
             # Vérification du stock de la variante
             if variant.stock < product_params[:quantity].to_i
               raise ActiveRecord::Rollback, "Stock insuffisant pour la variante #{variant.name}"
             end
-            
+
             # Création de l'item de commande avec la variante
             order.order_items.create!(
               product: variant.product,
@@ -124,35 +124,36 @@ class Api::HomeController < ApplicationController
               price: product_params[:price].to_f,
               variant_details: variant.name # Stocker les infos de la variante
             )
-            
+
             # Mise à jour du stock de la variante
             variant.update!(stock: variant.stock - product_params[:quantity].to_i)
-            
+
             # Mise à jour du stock général du produit si nécessaire
             # (selon votre logique métier)
             variant.product.update!(stock: variant.product.stock - product_params[:quantity].to_i)
           else
             # Cas où le client a choisi le produit sans variante spécifique
             product = Product.find(product_params[:id])
-            
+
             # Vérification du stock du produit
             if product.stock < product_params[:quantity].to_i
               raise ActiveRecord::Rollback, "Stock insuffisant pour le produit #{product.name}"
             end
-            
+
             # Création de l'item de commande sans variante
             order.order_items.create!(
               product: product,
               quantity: product_params[:quantity].to_i,
               price: product_params[:unitPrice].to_f
             )
-       
+
             stock = product.stock - product_params[:quantity].to_i
+
             # Mise à jour du stock du produit
             product.update!(stock: stock)
           end
         end
-  
+
         # Paiement Orange Money (garder votre logique existante)
         if params[:payment][:paymentMethod] == 'mobile' && params[:payment][:paymentType]&.downcase == 'orange_money'
           om_service = OrangeMoneyService.new
@@ -162,7 +163,7 @@ class Api::HomeController < ApplicationController
             SecureRandom.uuid,
             params[:payment][:otp]
           )
-  
+
           if payment_response && payment_response["status"] == "SUCCESS"
             order.update!(paid: true, status: 'paid')
           else
@@ -180,7 +181,7 @@ class Api::HomeController < ApplicationController
          # render json: { message: "Commande bien reçu" }, status: :ok
          # return
         end
-  
+
         render json: order, include: { order_items: { include: [:product, :variant] } }, status: :created
       else
         render json: { errors: order.errors.full_messages }, status: :unprocessable_entity

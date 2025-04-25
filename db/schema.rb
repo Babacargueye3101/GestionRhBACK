@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -68,6 +68,41 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
     t.string "appointment_type"
     t.bigint "compagny_id", null: false
     t.index ["compagny_id"], name: "index_appointments_on_compagny_id"
+  end
+
+  create_table "availabilities", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "date", null: false
+    t.text "time_slots", default: [], array: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "salon_id"
+    t.index ["salon_id"], name: "index_availabilities_on_salon_id"
+    t.index ["user_id"], name: "index_availabilities_on_user_id"
+  end
+
+  create_table "categories", force: :cascade do |t|
+    t.string "name", null: false
+    t.bigint "shop_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_categories_on_shop_id"
+  end
+
+  create_table "channels", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "clients", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "surname", null: false
+    t.string "email"
+    t.string "phone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "deleted", default: false
   end
 
   create_table "compagnies", force: :cascade do |t|
@@ -150,17 +185,187 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
     t.index ["employee_id"], name: "index_leaves_on_employee_id"
   end
 
-  create_table "payments", force: :cascade do |t|
-    t.bigint "employee_id", null: false
-    t.date "payment_date"
-    t.decimal "amount", precision: 10, scale: 2
-    t.string "payment_method"
-    t.string "reference_number"
-    t.string "status"
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "quantity"
+    t.decimal "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "compagny_id"
-    t.index ["employee_id"], name: "index_payments_on_employee_id"
+    t.bigint "variant_id"
+    t.jsonb "variant_details", default: {}
+    t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
+    t.index ["variant_id"], name: "index_order_items_on_variant_id"
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "client_name"
+    t.string "client_phone"
+    t.string "client_address"
+    t.decimal "total"
+    t.string "status"
+    t.string "payment_method"
+    t.string "mobile_phone"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "paid", default: false
+    t.string "payement_type"
+  end
+
+  create_table "payment_methodes", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.bigint "sale_id", null: false
+    t.decimal "amount"
+    t.datetime "payment_date"
+    t.datetime "next_payment_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sale_id"], name: "index_payments_on_sale_id"
+  end
+
+  create_table "personnel_shops", force: :cascade do |t|
+    t.bigint "personnel_id", null: false
+    t.bigint "shop_id"
+    t.bigint "salon_id"
+    t.boolean "can_view_stats", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["personnel_id"], name: "index_personnel_shops_on_personnel_id"
+    t.index ["salon_id"], name: "index_personnel_shops_on_salon_id"
+    t.index ["shop_id"], name: "index_personnel_shops_on_shop_id"
+  end
+
+  create_table "personnels", force: :cascade do |t|
+    t.string "first_name"
+    t.string "last_name"
+    t.string "address"
+    t.string "phone"
+    t.string "email"
+    t.boolean "can_view_statistics", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_personnels_on_user_id"
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.decimal "price"
+    t.integer "stock"
+    t.bigint "shop_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "category_id"
+    t.index ["category_id"], name: "index_products_on_category_id"
+    t.index ["shop_id"], name: "index_products_on_shop_id"
+  end
+
+  create_table "reservations", force: :cascade do |t|
+    t.bigint "client_id", null: false
+    t.bigint "availability_id", null: false
+    t.string "time"
+    t.string "status", default: "pending"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["availability_id"], name: "index_reservations_on_availability_id"
+    t.index ["client_id"], name: "index_reservations_on_client_id"
+  end
+
+  create_table "sale_items", force: :cascade do |t|
+    t.bigint "sale_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "quantity"
+    t.decimal "price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_sale_items_on_product_id"
+    t.index ["sale_id"], name: "index_sale_items_on_sale_id"
+  end
+
+  create_table "sales", force: :cascade do |t|
+    t.string "buyer_name"
+    t.string "buyer_surname"
+    t.string "channel"
+    t.decimal "total_price"
+    t.decimal "paid_amount"
+    t.decimal "remaining_amount"
+    t.string "payment_method"
+    t.boolean "delivered"
+    t.datetime "sale_date"
+    t.bigint "user_id", null: false
+    t.bigint "shop_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_sales_on_shop_id"
+    t.index ["user_id"], name: "index_sales_on_user_id"
+  end
+
+  create_table "salons", force: :cascade do |t|
+    t.string "name"
+    t.string "address"
+    t.string "phone"
+    t.text "description"
+    t.bigint "shop_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["shop_id"], name: "index_salons_on_shop_id"
+  end
+
+  create_table "services", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.integer "price"
+    t.integer "duration"
+    t.bigint "salon_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["salon_id"], name: "index_services_on_salon_id"
+  end
+
+  create_table "shops", force: :cascade do |t|
+    t.string "name"
+    t.string "location"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_shops_on_user_id"
+  end
+
+  create_table "subscription_types", force: :cascade do |t|
+    t.string "name"
+    t.decimal "price"
+    t.text "description"
+    t.string "letter"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "deleted", default: false
+    t.index ["letter"], name: "index_subscription_types_on_letter", unique: true
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.string "card_number"
+    t.bigint "subscription_type_id", null: false
+    t.bigint "client_id", null: false
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_subscriptions_on_client_id"
+    t.index ["subscription_type_id"], name: "index_subscriptions_on_subscription_type_id"
+  end
+
+  create_table "time_slots", force: :cascade do |t|
+    t.string "start_time", null: false
+    t.string "end_time", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", force: :cascade do |t|
@@ -177,12 +382,27 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
     t.string "role", default: "employee"
     t.boolean "can_see_dashboard", default: false
     t.boolean "can_see_employee", default: false
-    t.boolean "can_see_candidature", default: false
-    t.boolean "can_see_formation", default: false
-    t.boolean "can_see_paies", default: false
+    t.boolean "can_see_reservation", default: false
+    t.boolean "can_see_vente", default: false
+    t.boolean "can_see_dispo", default: false
+    t.string "token"
+    t.boolean "can_see_shop", default: false
+    t.boolean "can_see_client", default: false
+    t.boolean "can_see_configuration", default: false
+    t.boolean "can_see_subs", default: false
+    t.boolean "can_see_salon", default: false
     t.index ["compagny_id"], name: "index_users_on_compagny_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  end
+
+  create_table "variants", force: :cascade do |t|
+    t.bigint "product_id", null: false
+    t.string "name"
+    t.integer "stock"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_variants_on_product_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -190,9 +410,32 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_13_110121) do
   add_foreign_key "announcements", "compagnies"
   add_foreign_key "announcements", "users"
   add_foreign_key "appointments", "compagnies"
+  add_foreign_key "availabilities", "users"
+  add_foreign_key "categories", "shops"
   add_foreign_key "documents", "folders"
   add_foreign_key "employees", "compagnies"
   add_foreign_key "leaves", "employees"
-  add_foreign_key "payments", "employees"
+  add_foreign_key "order_items", "orders"
+  add_foreign_key "order_items", "products"
+  add_foreign_key "order_items", "variants"
+  add_foreign_key "payments", "sales"
+  add_foreign_key "personnel_shops", "personnels"
+  add_foreign_key "personnel_shops", "salons"
+  add_foreign_key "personnel_shops", "shops"
+  add_foreign_key "personnels", "users"
+  add_foreign_key "products", "categories"
+  add_foreign_key "products", "shops"
+  add_foreign_key "reservations", "availabilities"
+  add_foreign_key "reservations", "clients"
+  add_foreign_key "sale_items", "products"
+  add_foreign_key "sale_items", "sales"
+  add_foreign_key "sales", "shops"
+  add_foreign_key "sales", "users"
+  add_foreign_key "salons", "shops"
+  add_foreign_key "services", "salons"
+  add_foreign_key "shops", "users"
+  add_foreign_key "subscriptions", "clients"
+  add_foreign_key "subscriptions", "subscription_types"
   add_foreign_key "users", "compagnies"
+  add_foreign_key "variants", "products"
 end

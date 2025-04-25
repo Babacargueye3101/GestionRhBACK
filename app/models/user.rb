@@ -13,10 +13,6 @@ class User < ApplicationRecord
 
 
 
-
-
-
-
   def generate_jwt
     JWT.encode({ id: id, exp: 24.hours.from_now.to_i }, ENV['SECRET_KEY_BASE'])
   end
