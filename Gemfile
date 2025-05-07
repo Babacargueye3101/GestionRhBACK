@@ -48,7 +48,8 @@ gem 'prawn-table'
 
 gem 'popper_js', '~> 1.16.0'
 
-
+gem 'cloudinary'
+gem 'activestorage-cloudinary-service'
 
 # Use Active Storage variant
 # gem 'image_processing', '~> 1.2'
