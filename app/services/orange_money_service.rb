@@ -52,7 +52,7 @@ class OrangeMoneyService
         id: ENV['PARTNER_ID']
       },
       amount: {
-        value: 50,
+        value: amount,
         unit: "XOF"
       },
       reference: reference
