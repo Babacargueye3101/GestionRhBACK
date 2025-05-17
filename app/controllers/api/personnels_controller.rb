@@ -22,7 +22,8 @@ class Api::PersonnelsController < ApplicationController
       if user.save
         
         personnel = user.create_personnel(personnel_params)  # Associe le personnel au user
-        UserMailer.welcome_email(user, user.password).deliver_later
+        # Use deliver_now instead of deliver_later to avoid serialization issues with the password
+        UserMailer.welcome_email(user, user.password).deliver_now
   
         if personnel.persisted?
           render json: { message: 'Personnel et compte utilisateur créés', personnel: personnel, user: user }, status: :created
