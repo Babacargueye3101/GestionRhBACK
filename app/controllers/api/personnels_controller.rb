@@ -12,9 +12,12 @@ class Api::PersonnelsController < ApplicationController
   # Créer un personnel et l'affecter à un ou plusieurs salons/shops
   def create
     ActiveRecord::Base.transaction do  # 🔥 Assure que tout se fait ou rien du tout
+      # Store the password in a variable before creating the user
+      temp_password = SecureRandom.hex(8) # 🔥 Génère un mot de passe aléatoire
+      
       user = User.new(
         email: personnel_params[:email],
-        password: SecureRandom.hex(8), # 🔥 Génère un mot de passe aléatoire
+        password: temp_password,
         name: "#{personnel_params[:first_name]} #{personnel_params[:last_name]}",
         compagny_id: 1
       )
@@ -22,8 +25,8 @@ class Api::PersonnelsController < ApplicationController
       if user.save
         
         personnel = user.create_personnel(personnel_params)  # Associe le personnel au user
-        # Use deliver_now instead of deliver_later to avoid serialization issues with the password
-        UserMailer.welcome_email(user, user.password).deliver_now
+        # Use the temporary password variable instead of user.password
+        UserMailer.welcome_email(user, temp_password).deliver_now
   
         if personnel.persisted?
           render json: { message: 'Personnel et compte utilisateur créés', personnel: personnel, user: user }, status: :created
