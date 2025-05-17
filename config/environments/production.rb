@@ -67,10 +67,16 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
-  # Configure email delivery to use file delivery method for production
-  config.action_mailer.delivery_method = :file
-  config.action_mailer.file_settings = { 
-    :location => Rails.root.join('tmp/mails') 
+  # Configuration pour envoyer des emails via Gmail SMTP
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp.gmail.com",
+    port: 587,
+    domain: "gmail.com",
+    authentication: "plain",
+    enable_starttls_auto: true,
+    user_name: "dabishprosenegal@gmail.com",
+    password: "ayasyqxzizfclhfy"
   }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
