@@ -26,7 +26,14 @@ class Api::PersonnelsController < ApplicationController
         
         personnel = user.create_personnel(personnel_params)  # Associe le personnel au user
         # Use the temporary password variable instead of user.password
-        UserMailer.welcome_email(user, temp_password).deliver_now
+        begin
+          UserMailer.welcome_email(user, temp_password).deliver_now
+          # Log successful email delivery
+          Rails.logger.info "Welcome email sent successfully to #{user.email}"
+        rescue => e
+          # Log the error but continue with user creation
+          Rails.logger.error "Failed to send welcome email: #{e.message}"
+        end
   
         if personnel.persisted?
           render json: { message: 'Personnel et compte utilisateur créés', personnel: personnel, user: user }, status: :created

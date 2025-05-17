@@ -94,8 +94,8 @@ Rails.application.configure do
     enable_starttls_auto: true,
     open_timeout: 5,  # Réduit le timeout pour éviter l'attente trop longue
     read_timeout: 5,
-    user_name: ENV["SMTP_USERNAME"], # Assurez-vous que cette variable d'environnement est définie
-    password: ENV["SMTP_PASSWORD"], # Assurez-vous que cette variable d'environnement est définie
+    user_name: "dabishprosenegal@gmail.com", # Hardcoded from .env file
+    password: "ayasyqxzizfclhfy", # Hardcoded from .env file
   }
 
   config.action_mailer.perform_deliveries = true # Assurez-vous que l'envoi est activé
