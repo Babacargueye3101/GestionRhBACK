@@ -75,8 +75,8 @@ Rails.application.configure do
     domain: "gmail.com",
     authentication: "plain",
     enable_starttls_auto: true,
-    user_name: "dabishprosenegal@gmail.com",
-    password: "ayasyqxzizfclhfy"
+    user_name: ENV['SMTP_USERNAME'],
+    password: ENV['SMTP_PASSWORD']
   }
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
