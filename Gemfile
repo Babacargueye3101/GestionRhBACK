@@ -42,9 +42,7 @@ gem 'kaminari'
 gem 'prawn'
 gem 'prawn-table'
 
-
-
-
+gem 'groupdate'
 
 gem 'popper_js', '~> 1.16.0'
 
