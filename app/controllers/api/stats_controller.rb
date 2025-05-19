@@ -68,4 +68,34 @@ class Api::StatsController < ApplicationController
     }, status: :ok
   end
 
+  # Méthode pour obtenir les statistiques des commandes par méthode de paiement avec le statut "delivered"
+  def orders_by_payment_method
+    # Récupérer les commandes avec le statut "delivered"
+    delivered_orders = Order.where(status: 'delivered')
+    
+    # Grouper les commandes par méthode de paiement et calculer le total
+    payment_stats = delivered_orders.group(:payment_method).sum(:total)
+    
+    # Compter le nombre de commandes par méthode de paiement
+    payment_counts = delivered_orders.group(:payment_method).count
+    
+    # Formater les résultats
+    result = payment_stats.map do |method, total|
+      {
+        payment_method: method,
+        total_amount: total,
+        order_count: payment_counts[method] || 0
+      }
+    end
+    
+    # Calculer le total global
+    total_amount = delivered_orders.sum(:total)
+    
+    render json: {
+      payment_methods: result,
+      total_delivered_amount: total_amount,
+      total_delivered_orders: delivered_orders.count
+    }, status: :ok
+  end
+
 end

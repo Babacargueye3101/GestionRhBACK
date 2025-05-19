@@ -99,6 +99,7 @@ Rails.application.routes.draw do
         get 'sales_by_employee'
         get 'all_personnel'
         get 'summary_stats'
+        get 'orders_by_payment_method'
       end
     end
 
