@@ -17,10 +17,10 @@ SecureHeaders::Configuration.default do |config|
     connect_src: %w('self' https: wss:),
     media_src: %w('self'),
     object_src: %w('self'),
-    frame_src: %w('self' http://dabishpro.com),
+    frame_src: %w('self' https://dabishpro.com),
     worker_src: %w('self'),
     base_uri: %w('self'),
     form_action: %w('self'),
-    frame_ancestors: %w('self' http://dabishpro.com)
+    frame_ancestors: %w('self' https://dabishpro.com)
   }
 end
