@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_02_095955) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -185,9 +185,24 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
     t.index ["employee_id"], name: "index_leaves_on_employee_id"
   end
 
+  create_table "order_item_histories", force: :cascade do |t|
+    t.integer "order_id"
+    t.integer "product_id"
+    t.integer "variant_id"
+    t.integer "quantity"
+    t.decimal "price", precision: 10, scale: 2
+    t.json "variant_details"
+    t.string "product_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_order_item_histories_on_order_id"
+    t.index ["product_id"], name: "index_order_item_histories_on_product_id"
+    t.index ["variant_id"], name: "index_order_item_histories_on_variant_id"
+  end
+
   create_table "order_items", force: :cascade do |t|
     t.bigint "order_id", null: false
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.integer "quantity"
     t.decimal "price"
     t.datetime "created_at", null: false
@@ -254,6 +269,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
     t.index ["user_id"], name: "index_personnels_on_user_id"
   end
 
+  create_table "product_histories", force: :cascade do |t|
+    t.string "name"
+    t.text "description"
+    t.decimal "price", precision: 10, scale: 2
+    t.integer "stock"
+    t.integer "product_id"
+    t.integer "shop_id"
+    t.integer "category_id"
+    t.json "product_data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_product_histories_on_category_id"
+    t.index ["product_id"], name: "index_product_histories_on_product_id"
+    t.index ["shop_id"], name: "index_product_histories_on_shop_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -278,9 +309,21 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
     t.index ["client_id"], name: "index_reservations_on_client_id"
   end
 
+  create_table "sale_item_histories", force: :cascade do |t|
+    t.integer "sale_id"
+    t.integer "product_id"
+    t.integer "quantity"
+    t.decimal "price", precision: 10, scale: 2
+    t.string "product_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_sale_item_histories_on_product_id"
+    t.index ["sale_id"], name: "index_sale_item_histories_on_sale_id"
+  end
+
   create_table "sale_items", force: :cascade do |t|
     t.bigint "sale_id", null: false
-    t.bigint "product_id", null: false
+    t.bigint "product_id"
     t.integer "quantity"
     t.decimal "price"
     t.datetime "created_at", null: false
@@ -416,7 +459,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
   add_foreign_key "employees", "compagnies"
   add_foreign_key "leaves", "employees"
   add_foreign_key "order_items", "orders"
-  add_foreign_key "order_items", "products"
+  add_foreign_key "order_items", "products", on_delete: :nullify, validate: false
   add_foreign_key "order_items", "variants"
   add_foreign_key "payments", "sales"
   add_foreign_key "personnel_shops", "personnels"
@@ -427,7 +470,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_25_204504) do
   add_foreign_key "products", "shops"
   add_foreign_key "reservations", "availabilities"
   add_foreign_key "reservations", "clients"
-  add_foreign_key "sale_items", "products"
+  add_foreign_key "sale_items", "products", on_delete: :nullify, validate: false
   add_foreign_key "sale_items", "sales"
   add_foreign_key "sales", "shops"
   add_foreign_key "sales", "users"
